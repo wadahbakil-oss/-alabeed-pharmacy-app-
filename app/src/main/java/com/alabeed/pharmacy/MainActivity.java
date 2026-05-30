@@ -1,4 +1,4 @@
-'''package com.alabeed.pharmacy;
+package com.alabeed.pharmacy;
 
 import android.app.Activity;
 import android.app.AlertDialog;
