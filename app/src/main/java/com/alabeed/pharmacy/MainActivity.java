@@ -3,6 +3,7 @@ package com.alabeed.pharmacy;
 import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.Window;
@@ -25,22 +26,42 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
         
         webView = findViewById(R.id.webView);
-        
+        setupWebView();
+        webView.loadUrl("file:///android_asset/index.html");
+    }
+    
+    private void setupWebView() {
         WebSettings settings = webView.getSettings();
+        
+        // Enable JavaScript
         settings.setJavaScriptEnabled(true);
+        
+        // ✅ Enable localStorage and DOM storage
         settings.setDomStorageEnabled(true);
         settings.setDatabaseEnabled(true);
+        
+        // Set database path for older Android versions
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.KITKAT) {
+            settings.setDatabasePath(getApplicationContext().getFilesDir().getPath());
+        }
+        
+        // Enable file access
         settings.setAllowFileAccess(true);
+        settings.setAllowContentAccess(true);
+        
+        // Enable zoom
         settings.setSupportZoom(true);
         settings.setBuiltInZoomControls(true);
         settings.setDisplayZoomControls(false);
         
+        // Handle WhatsApp and SMS links
         webView.setWebViewClient(new WebViewClient() {
             @Override
             public boolean shouldOverrideUrlLoading(WebView view, String url) {
                 if (url.startsWith("https://wa.me/")) {
                     try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
                         return true;
                     } catch (Exception e) {
                         Toast.makeText(MainActivity.this, "WhatsApp غير مثبت", Toast.LENGTH_SHORT).show();
@@ -49,22 +70,17 @@ public class MainActivity extends Activity {
                 }
                 if (url.startsWith("sms:")) {
                     try {
-                        startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(url)));
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                        startActivity(intent);
                         return true;
                     } catch (Exception e) {
                         Toast.makeText(MainActivity.this, "لا يمكن فتح الرسائل", Toast.LENGTH_SHORT).show();
                         return true;
                     }
                 }
-                if (url.startsWith("http://") || url.startsWith("https://")) {
-                    view.loadUrl(url);
-                    return true;
-                }
                 return false;
             }
         });
-        
-        webView.loadUrl("file:///android_asset/index.html");
     }
     
     @Override
