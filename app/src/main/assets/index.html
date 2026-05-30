@@ -96,6 +96,8 @@
             text-align: center; 
             font-size: 12px; 
         }
+        /* تقليل المسافة بين الصفوف */
+        tr { height: 40px; }
         input[type="number"], input[type="text"] { 
             padding: 5px; 
             border-radius: 5px; 
@@ -125,8 +127,9 @@
         .footer { text-align: center; color: white; margin-top: 15px; font-size: 11px; opacity: 0.8; }
         .empty { text-align: center; padding: 30px; color: #999; }
         .highlight-row { background: #fff8e1; }
-        .movement-row { background: #e8f5e9 !important; }
-        
+        .movement-row { background: #e8f5e9 !imp
+  ortant; }
+
         .import-section { 
             border: 2px dashed #2b8c5e; 
             border-radius: 8px; 
@@ -198,22 +201,197 @@
         }
         .modal h3 { color: #1e5799; margin-bottom: 15px; }
         .modal p { margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
-        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
         .modal-buttons button { padding: 10px 20px; font-size: 14px; }
         .btn-confirm { background: #2b8c5e; }
         .btn-cancel { background: #6c757d; }
         .btn-wa-modal { background: #25D366; }
+
+        /* Login screen styles */
+        .login-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: linear-gradient(135deg, #1e5799 0%, #2b8c5e 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+        }
+        .login-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90%;
+            width: 320px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .login-box h2 { color: #1e5799; margin-bottom: 20px; }
+        .login-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .login-box button {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 10px;
+        }
+        .login-error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        .login-error.show { display: block; }
+
+        /* Activation screen */
+        .activation-box {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 90%;
+            width: 350px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        .activation-box h2 { color: #dc3545; margin-bottom: 15px; }
+        .activation-box p { color: #666; margin-bottom: 20px; font-size: 14px; }
+        .activation-box input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            font-size: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+        .activation-box button {
+            width: 100%;
+            padding:
+12px;
+            font-size: 16px;
+            border-radius: 10px;
+            background: #dc3545;
+        }
+        .activation-error {
+            color: #dc3545;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+        .activation-error.show { display: block; }
+        .trial-info {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            font-size: 13px;
+            color: #856404;
+        }
+
+        /* Settings button */
+        .settings-btn {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            background: rgba(255,255,255,0.2);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            color: white;
+            font-size: 18px;
+            z-index: 100;
+            cursor: pointer;
+        }
+
+        /* Settings modal */
+        .settings-modal {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 90%;
+            width: 320px;
+            text-align: center;
+        }
+        .settings-modal h3 { color: #1e5799; margin-bottom: 15px; }
+        .settings-modal input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+        .settings-modal label {
+            display: block;
+            text-align: right;
+            margin-bottom: 5px;
+            font-size: 14px;
+            color: #666;
+        }
+
         @media (max-width: 700px) {
             th, td { font-size: 10px; padding: 4px; }
             input { width: 55px; font-size: 10px; }
             button { padding: 4px 6px; font-size: 10px; }
             .header h1 { font-size: 18px; }
             .card-title { font-size: 16px; }
+            tr { height: 35px; }
         }
     </style>
 </head>
 <body>
-<div class="container">
+
+<!-- Login Screen -->
+<div class="login-overlay" id="loginScreen">
+    <div class="login-box">
+        <h2>🔐 تسجيل الدخول</h2>
+        <p style="color:#666; font-size:13px; margin-bottom:15px;">صيدلية العابد - نظام إدارة العملاء</p>
+        <input type="password" id="loginPassword" placeholder="أدخل كلمة المرور" onkeypress="if(event.key==='Enter')doLogin()">
+        <button onclick="doLogin()" class="touch-btn">🔓 دخول</button>
+        <div class="login-error" id="loginError">❌ كلمة المرور غير صحيحة</div>
+    </div>
+</div>
+
+<!-- Activation Screen -->
+<div class="login-overlay" id="activationScreen" style="display:none;">
+    <div class="activation-box">
+        <h2>⏰ انتهت الفترة التجريبية</h2>
+        <div class="trial-info" id="trialInfo"></div>
+        <p>الرجاء إدخال كود التفعيل للاستمرار</p>
+        <input type="text" id="activationCode" placeholder="أدخل كود التفعيل" maxlength="20" onkeypress="if(event.key==='Enter')doActivate()">
+        <button onclick="doActivate()" class="touch-btn">✅ تفعيل</button>
+        <div class="activation-error" id="activationError">❌ كود التفعيل غير صحيح</div>
+    </div>
+</div>
+
+<!-- Settings Button -->
+<button class="settings-btn" onclick="showSettings()" id="settingsBtn" style="display:none;">⚙️</button>
+
+<!-- Settings Modal -->
+<div class="modal-overlay" id="settingsModal">
+    <div class="settings-modal">
+        <h3>⚙️ الإعدادات</h3>
+        <label>تغيير كلمة المرور:</label>
+        <input type="password" id="newPassword" placeholder="كلمة المرور الجديدة">
+        <label>تأكيد كلمة المرور:</label>
+        <input type="password" id="confirmPassword" placeholder="تأكيد كلمة المرور">
+        <div class="modal-buttons">
+            <button class="btn-confirm" onclick="changePassword()">💾 حفظ</button>
+            <button class="btn-cancel" onclick="closeSettings()">❌ إلغاء</button>
+        </div>
+    </div>
+</div>
+
+<div class="container" id="mainContent" style="display:none;">
     <div class="header">
         <h1>👑 صيدلية العابد</h1>
         <p>نظام إدارة العملاء والديون</p>
@@ -230,7 +408,7 @@
     </div>
 
     <div class="card">
-        <div class="card-title">📊 الفلترة</div>
+<div class="card-title">📊 الفلترة</div>
         <div class="filter-buttons">
             <button id="showAllBtn" onclick="setFilter('all')" style="background:#2b8c5e; color:white;" class="touch-btn">👥 عرض جميع العملاء</button>
             <button id="showMovementBtn" onclick="setFilter('movement')" style="background:#FF9800; color:white; opacity:0.6;" class="touch-btn">📊 عملاء الحركة اليومية فقط</button>
@@ -270,11 +448,16 @@
         <div class="button-group">
             <button onclick="addCustomer()" class="touch-btn">➕ إضافة عميل</button>
             <button onclick="exportToExcel()" class="touch-btn">📊 تصدير Excel</button>
-            <button class="btn-group touch-btn" onclick="sendGroupWhatsApp()">📱 واتساب للكل</button>
-            <button class="btn-sms touch-btn" onclick="sendGroupSMS()">✉️ رسائل للكل</button>
+        </div>
+
+        <!-- Three new message buttons -->
+        <div class="button-group" style="margin-top: 10px;">
+            <button class="btn-group touch-btn" onclick="sendGroupWhatsAppMovement()" style="background: #25D366;">📱 واتساب - الحركة اليومية فقط</button>
+            <button class="btn-group touch-btn" onclick="sendGroupWhatsAppAll()" style="background: #128C7E;">📱 واتساب - جميع العملاء</button>
+            <button class="btn-sms touch-btn" onclick="sendGroupSMSMovement()">✉️ رسائل - الحركة اليومية فقط</button>
         </div>
     </div>
-    
+
     <div class="footer">صيدلية العابد - تعز - الحوبان - مدخل البريد - 770066128</div>
 </div>
 
@@ -292,15 +475,22 @@
         </div>
     </div>
 </div>
+
 <script>
     const FIREBASE_URL = "https://alabeed-pharmacy-default-rtdb.firebaseio.com/customers.json";
-    
+    const ACTIVATION_CODES_URL = "https://alabeed-pharmacy-default-rtdb.firebaseio.com/activation_codes.json";
+
     let customers = [];
     let searchId = "", searchName = "";
     let currentFilter = "all";
     let isAndroid = typeof Android !== 'undefined';
     let modalCustomerId = null;
     let modalNewTotal = 0;
+
+    // Trial and activation variables
+    let currentGroupIndex = 0;
+    let currentGroupTargets = [];
+    let currentGroupType = '';
 
     function showToast(message) {
         const toast = document.getElementById('toast');
@@ -309,6 +499,133 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
+    // ========== LOGIN & ACTIVATION SYSTEM ==========
+    function initSecurity() {
+        // Check if first run
+        if (!localStorage.getItem('pharmacy_password')) {
+            localStorage.setItem('pharmacy_password', '1234');
+            localStorage.setItem('pharmacy_first_run', Date.now().toString());
+            localStorage.setItem('pharmacy_activated', 'false');
+        }
+
+        // Chec
+k trial period (1 day = 86400000 ms)
+        const firstRun = parseInt(localStorage.getItem('pharmacy_first_run') || '0');
+        const now = Date.now();
+        const trialDuration = 86400000; // 1 day in milliseconds
+
+        if (localStorage.getItem('pharmacy_activated') === 'true') {
+            // Already activated, show login
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('activationScreen').style.display = 'none';
+        } else if (now - firstRun > trialDuration) {
+            // Trial expired, show activation
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('activationScreen').style.display = 'flex';
+            const hoursLeft = Math.max(0, Math.floor((trialDuration - (now - firstRun)) / 3600000));
+            document.getElementById('trialInfo').innerHTML = `الفترة التجريبية (24 ساعة) انتهت. الرجاء إدخال كود التفعيل.`;
+        } else {
+            // Still in trial, show login
+            const hoursLeft = Math.floor((trialDuration - (now - firstRun)) / 3600000);
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('activationScreen').style.display = 'none';
+        }
+    }
+
+    function doLogin() {
+        const password = document.getElementById('loginPassword').value;
+        const savedPassword = localStorage.getItem('pharmacy_password') || '1234';
+
+        if (password === savedPassword) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('mainContent').style.display = 'block';
+            document.getElementById('settingsBtn').style.display = 'block';
+            document.getElementById('loginError').classList.remove('show');
+            loadFromLocal();
+        } else {
+            document.getElementById('loginError').classList.add('show');
+        }
+    }
+
+    async function doActivate() {
+        const code = document.getElementById('activationCode').value.trim();
+
+        try {
+            // Check online activation codes
+            const response = await fetch(ACTIVATION_CODES_URL);
+            const codes = await response.json();
+
+            let isValid = false;
+            let isYearly = false;
+
+            if (codes) {
+                const codesList = Array.isArray(codes) ? codes : Object.values(codes);
+                for (let c of codesList) {
+                    if (c && c.code === code && !c.used) {
+                        isValid = true;
+                        isYearly = c.type === 'yearly';
+                        break;
+                    }
+                }
+            }
+
+            if (isValid) {
+                localStorage.setItem('pharmacy_activated', 'true');
+                if (isYearly) {
+                    localStorage.setItem('pharmacy_activation_type', 'yearly');
+                    localStorage.setItem('pharmacy_activation_expiry', (Date.now() + 31536000000).toString()); // 1 year
+                }
+                document.getElementById('activationScreen').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'flex';
+                showToast('✅ تم التفعيل بنجاح!');
+            } else {
+                document.getElementById('activationError').classList.add('show');
+            }
+        } catch(e) {
+            // Offline fallback - check local codes
+            const localCodes = ['ALABEED2024', 'PHARMACY365', 'YEMEN2024'];
+            if (localCodes.includes(code)) {
+                localStorage.setItem('pharmacy_activated', 'true');
+                localStorage.setItem('pharmacy_activation_type', 'yearly');
+                localStorage.setItem('pharmacy_activation_expiry', (Date.now() + 31536000000).toString());
+                document.getElementById('activationScreen').style.display = 'none';
+                document.getElementById('loginScreen').style.display = 'flex';
+                showToast('✅ تم التفعيل بنجاح!');
+            } else {
+                document.getElementById('activationError').classList.add('show');
+            }
+        }
+    }
+
+    function showSettings() {
+        document.getElementById('settingsModal').classList.add('active');
+    }
+
+    function closeSettings() {
+        document.getElementById('settingsModal').classList.remove('active');
+        document.getElementById('newPassword').value = '';
+        document.getElementById('confirmPassword').value = '';
+    }
+
+    function changePassword() {
+const newPass = document.getElementById('newPassword').value;
+        const confirmPass = document.getElementById('confirmPassword').value;
+
+        if (!newPass) {
+            showToast('❌ أدخل كلمة المرور الجديدة');
+            return;
+        }
+        if (newPass !== confirmPass) {
+            showToast('❌ كلمات المرور غير متطابقة');
+            return;
+        }
+
+        localStorage.setItem('pharmacy_password', newPass);
+        showToast('✅ تم تغيير كلمة المرور بنجاح');
+        closeSettings();
+    }
+
+    // ========== MESSAGE FUNCTIONS ==========
     function getMovementMessage(customer, newTotal) {
         if (customer.debt > 0 && customer.paid > 0) {
             return `الاخ ${customer.name}، نود اعلامكم بان تم تقيد مبلغ ${customer.debt.toLocaleString()} ريال (فاتورة جديدة) وتم استلام مبلغ ${customer.paid.toLocaleString()} ريال (سداد) ليصبح اجمالي الرصيد عليكم ${newTotal.toLocaleString()} ريال.\n\nيرجى السداد بداية ونهاية كل شهر\n\n🏥 صيدلية العابد\nتعز - الحوبان - مدخل البريد\n📞 770066128`;
@@ -324,6 +641,96 @@
         return `سلام الله عليكم يا ${customer.name}، لو سمحت ممكن تسديد الحساب نهاية شهر وبداية الشهر، الصيدلية صيدليتك بأي وقت.\nحسابك: ${(customer.totalDebt || 0).toLocaleString()} ريال\nصيدلية العابد`;
     }
 
+    // ========== SEQUENTIAL WHATSAPP SENDING ==========
+    async function sendGroupWhatsAppMovement() {
+        let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
+        if (!targets.length) { 
+            showToast('❌ لا يوجد عملاء بحركة يومية'); 
+            return; 
+        }
+
+        currentGroupTargets = targets;
+        currentGroupIndex = 0;
+        currentGroupType = 'whatsapp';
+
+        showToast(`📱 جاري الإرسال لـ ${targets.length} عميل...`);
+        sendNextInSequence();
+    }
+
+    async function sendGroupWhatsAppAll() {
+        let targets = customers.filter(c => c.phone && c.phone.length >= 9);
+        if (!targets.length) { 
+            showToast('❌ لا يوجد عملاء'); 
+            return; 
+        }
+
+        currentGroupTargets = targets;
+        currentGroupIndex = 0;
+        currentGroupType = 'whatsapp_all';
+
+        showToast(`📱 جاري الإرسال لـ ${targets.length} عميل...`);
+        sendNextInSequence();
+    }
+
+    async function sendGroupSMSMovement() {
+        let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
+        if (!targets.length) { 
+            showToast('❌ لا يوجد عملاء بحركة يومية'); 
+            return; 
+        }
+
+        currentGroupTargets = targets;
+        currentGroupIndex = 0;
+        currentGroupType = 'sms';
+
+        showToast(`✉️ جاري الإرسال لـ ${targets.length} عميل...`);
+        sendNextInSequence();
+    }
+
+    function sendNextInSequence() {
+        if (currentGroupIndex >= currentGroupTargets.length) {
+            showToast('✅ تم الانتهاء من الإرسال');
+            return;
+        }
+
+        const c = currentGroupTargets[currentGroupIndex];
+        const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+        let msg = "";
+        let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
+
+        if (currentGroupType === 'whatsapp' || currentGroupType === 'whatsapp_all') {
+            if (currentGroupType === 'whatsapp') {
+                msg = getMovementMessage(c, newTotal);
+            } else {
+                msg = getReminderMessage(c);
+            }
+
+            if (isAndroid) {
+                Android.openWhatsApp(phone, msg);
+            } else {
+                window.open(`https://wa.me/967${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            }
+
+            // Wait for user to return, then send next
+            currentGroupIndex++;
+            showToast(`📱 تم فتح واتساب ${c.name} (${currentGroupIndex}/${currentGroupTargets.le
+  ngth})`);
+
+        } else if (currentGroupType === 'sms') {
+            msg = getMovementMessage(c, newTotal);
+
+            if (isAndroid) {
+                Android.openSMS(phone, msg);
+            } else {
+                window.location.href = `sms:+967${phone}?body=${encodeURIComponent(msg)}`;
+            }
+
+            currentGroupIndex++;
+            showToast(`✉️ تم فتح رسائل ${c.name} (${currentGroupIndex}/${currentGroupTargets.length})`);
+        }
+    }
+
+    // ========== DATA FUNCTIONS ==========
     function saveToLocal() {
         localStorage.setItem('pharmacy_customers', JSON.stringify(customers));
         document.getElementById('syncStatus').innerHTML = '✅ محلي: ' + new Date().toLocaleTimeString();
@@ -420,7 +827,7 @@
             }
             saveToLocal();
             renderTable();
-            showToast(`✅ تم استيراد ${count} عميل`);
+    showToast(`✅ تم استيراد ${count} عميل`);
             fileInput.value = '';
         };
         reader.readAsText(file, 'UTF-8');
@@ -515,7 +922,8 @@
                 <td><input type="number" id="balance_${c.id}" value="${c.totalDebt || 0}" step="any" style="width:70px"></td>
                 <td><input type="number" id="debt_${c.id}" value="${c.debt || 0}" step="any" style="width:60px"></td>
                 <td><input type="number" id="paid_${c.id}" value="${c.paid || 0}" step="any" style="width:60px"></td>
-                <td id="new_${c.id}" style="color:#2b8c5e; font-weight:bold;">${newTotal.toLocaleString()}</td>
+                <td id="new_${c.id}" style="color:#2b8c5e; font-weight:bo
+        ld;">${newTotal.toLocaleString()}</td>
                 <td>
                     <button onclick="updateCustomer(${c.id})" class="touch-btn">💾</button>
                     <button class="btn-wa touch-btn" onclick="sendWA(${c.id})">📱</button>
@@ -601,7 +1009,6 @@
         renderTable();
         showToast(`✅ تم حفظ ${c.name}`);
         if (isAndroid) Android.showToast(`✅ تم حفظ العميل: ${c.name}`);
-        // ✅ إظهار Modal لإرسال رسالة إذا كان هناك حركة
         if (newDebt > 0 || newPaid > 0) {
             showModal(id, finalTotal);
         }
@@ -620,8 +1027,8 @@
         const c = customers.find(c => c.id == id);
         if (!c || !c.phone) { 
             showToast('❌ رقم غير موجود'); 
-            if (isAndroid) Android.showToast('❌ رقم غير موجود');
-            return; 
+            if (isAndroid) Android.showToast('❌ رقم غير موجود');    
+        return; 
         }
         let msg = "";
         const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
@@ -631,6 +1038,7 @@
             msg = getReminderMessage(c); 
         }
         let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
+
         if (isAndroid) {
             Android.openWhatsApp(phone, msg);
         } else {
@@ -653,77 +1061,12 @@
             msg = getReminderMessage(c); 
         }
         let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
+
         if (isAndroid) {
             Android.openSMS(phone, msg);
         } else {
             window.location.href = `sms:+967${phone}?body=${encodeURIComponent(msg)}`;
         }
-    }
-
-    async function sendGroupWhatsApp() {
-        let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
-        if (!targets.length) { 
-            showToast('❌ لا يوجد عملاء بحركة'); 
-            if (isAndroid) Android.showToast('❌ لا يوجد عملاء لديهم حركة يومية');
-            return; 
-        }
-        for (let i = 0; i < targets.length; i++) {
-            const c = targets[i]; 
-            const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
-            let msg = getMovementMessage(c, newTotal);
-            let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
-            if (isAndroid) {
-                Android.openWhatsApp(phone, msg);
-            } else {
-                window.open(`https://wa.me/967${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-            }
-            if (i < targets.length - 1) { 
-                await new Promise(resolve => { 
-                    if (isAndroid) {
-                        Android.showAlert('تم الإرسال', `تم فتح محادثة ${c.name} - اضغط موافق للتالي`);
-                        setTimeout(resolve, 2000);
-                    } else {
-                        alert(`✅ تم فتح محادثة ${c.name}\nاضغط OK للتالي`); 
-                        resolve(); 
-                    }
-                }); 
-            }
-        }
-        showToast('✅ تم الانتهاء');
-        if (isAndroid) Android.showToast('✅ تم الانتهاء');
-    }
-
-    async function sendGroupSMS() {
-        let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
-        if (!targets.length) { 
-            showToast('❌ لا يوجد عملاء بحركة'); 
-            if (isAndroid) Android.showToast('❌ لا يوجد عملاء لديهم حركة يومية');
-            return; 
-        }
-        for (let i = 0; i < targets.length; i++) {
-            const c = targets[i]; 
-            const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
-            let msg = getMovementMessage(c, newTotal);
-            let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
-            if (isAndroid) {
-                Android.openSMS(phone, msg);
-            } else {
-                window.location.href = `sms:+967${phone}?body=${encodeURIComponent(msg)}`;
-            }
-            if (i < targets.length - 1) { 
-                await new Promise(resolve => { 
-                    if (isAndroid) {
-                        Android.showAlert('تم الإرسال', `تم إرسال رسالة لـ ${c.name} - اضغط موافق للتالي`);
-                        setTimeout(resolve, 2000);
-                    } else {
-                        alert(`✅ تم إرسال رسالة لـ ${c.name}\nاضغط OK للتالي`); 
-                        resolve(); 
-                    }
-                }); 
-            }
-        }
-        showToast('✅ تم إرسال الرسائل');
-        if (isAndroid) Android.showToast('✅ تم إرسال الرسائل');
     }
 
     async function addCustomer() {
@@ -782,8 +1125,6 @@
     window.sendSMS = sendSMS;
     window.deleteCustomer = deleteCustomer; 
     window.addCustomer = addCustomer;
-    window.sendGroupWhatsApp = sendGroupWhatsApp; 
-    window.sendGroupSMS = sendGroupSMS;
     window.exportToExcel = exportToExcel; 
     window.searchCustomers = searchCustomers;
     window.clearSearch = clearSearch; 
@@ -795,7 +1136,18 @@
     window.closeModal = closeModal;
     window.modalSendWhatsApp = modalSendWhatsApp;
     window.modalSendSMS = modalSendSMS;
+    window.doLogin = doLogin;
+    window.doActivate = doActivate;
+    window.showSettings = showSettings;
+    window.closeSettings = closeSettings;
+    window.changePassword = changePassword;
+    window.sendGroupWhatsAppMovement = sendGroupWhatsAppMovement;
+    window.sendGroupWhatsAppAll = sendGroupWhatsAppAll;
+    window.sendGroupSMSMovement = sendGroupSMSMovement;
+    window.sendNextInSequence = sendNextInSequence;
 
+    // Initialize
+    initSecurity();
     if (!loadFromLocal()) { customers = []; }
     renderTable();
 
