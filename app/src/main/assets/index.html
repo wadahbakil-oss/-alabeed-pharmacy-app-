@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>صيدلية العابد</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            background: linear-gradient(135deg, #1e5799 0%, #2b8c5e 100%); 
+            min-height: 100vh; 
+            padding: 10px; 
+            -webkit-user-select: none;
+            user-select: none;
+            overscroll-behavior: none;
+        }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { text-align: center; color: white; margin-bottom: 15px; padding: 10px; }
+        .header h1 { font-size: 22px; margin-bottom: 5px; }
+        .header p { font-size: 12px; opacity: 0.9; }
+        .card { 
+            background: white; 
+            border-radius: 12px; 
+            padding: 15px; 
+            margin-bottom: 15px; 
+            box-shadow: 0 3px 10px rgba(0,0,0,0.2); 
+        }
+        .card-title { 
+            font-size: 18px; 
+            font-weight: bold; 
+            margin-bottom: 12px; 
+            color: #1e5799; 
+            border-bottom: 2px solid #2b8c5e; 
+            padding-bottom: 6px; 
+        }
+        .search-box { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .search-box input { 
+            flex: 1; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 8px; 
+            font-size: 14px;
+            min-width: 120px;
+        }
+        .search-box button { 
+            padding: 10px 16px; 
+            background: #2b8c5e; 
+            color: white; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 14px;
+            touch-action: manipulation;
+        }
+        .filter-buttons { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+        .filter-buttons button { 
+            flex: 1; 
+            padding: 10px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            font-size: 13px;
+            touch-action: manipulation;
+        }
+        .stats { 
+            background: #e3f2fd; 
+            padding: 10px; 
+            border-radius: 8px; 
+            margin-bottom: 12px; 
+            text-align: center; 
+            font-weight: bold; 
+            font-size: 13px;
+        }
+        .sync-status { 
+            background: #fff3cd; 
+            padding: 8px; 
+            border-radius: 8px; 
+            margin-bottom: 10px; 
+            text-align: center; 
+            font-size: 12px; 
+        }
+        table { width: 100%; border-collapse: collapse; font-size: 12px; }
+        th { 
+            background: #1e5799; 
+            color: white; 
+            padding: 8px; 
+            font-size: 12px; 
+            position: sticky;
+            top: 0;
+        }
+        td { 
+            padding: 6px; 
+            border-bottom: 1px solid #ddd; 
+            text-align: center; 
+            font-size: 12px; 
+        }
+        input[type="number"], input[type="text"] { 
+            padding: 5px; 
+            border-radius: 5px; 
+            border: 1px solid #ccc; 
+            width: 70px; 
+            text-align: center; 
+            font-size: 12px;
+        }
+        button { 
+            background: #2b8c5e; 
+            color: white; 
+            border: none; 
+            padding: 6px 10px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 1px; 
+            font-size: 11px;
+            touch-action: manipulation;
+        }
+        .btn-wa { background: #25D366; }
+        .btn-sms { background: #2196F3; }
+        .btn-danger { background: #dc3545; }
+        .btn-save-cloud { background: #17a2b8; }
+        .btn-group { background: #128C7E; padding: 8px 16px; }
+        .button-group { display: flex; gap: 8px; margin-top: 12px; flex-wrap: wrap; }
+        .button-group button { flex: 1; font-size: 13px; padding: 10px; }
+        .footer { text-align: center; color: white; margin-top: 15px; font-size: 11px; opacity: 0.8; }
+        .empty { text-align: center; padding: 30px; color: #999; }
+        .highlight-row { background: #fff8e1; }
+        .movement-row { background: #e8f5e9 !important; }
+        
+        .import-section { 
+            border: 2px dashed #2b8c5e; 
+            border-radius: 8px; 
+            padding: 12px; 
+            margin-bottom: 12px; 
+            background: #fafafa; 
+            text-align: center; 
+        }
+        .import-section p { font-size: 11px; color: #666; margin: 4px 0 8px 0; }
+        .import-section input[type="file"] { 
+            margin-bottom: 8px; 
+            display: inline-block; 
+            font-size: 12px;
+            width: 100%;
+        }
+        .btn-import { 
+            background: #6c757d; 
+            color: white; 
+            width: 100%; 
+            max-width: 250px; 
+            padding: 8px; 
+            border-radius: 5px; 
+            display: block; 
+            margin: 0 auto; 
+        }
+        .touch-btn {
+            min-height: 44px;
+            min-width: 44px;
+        }
+        .table-scroll {
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 14px;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s;
+            pointer-events: none;
+        }
+        .toast.show { opacity: 1; }
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.5);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-overlay.active { display: flex; }
+        .modal {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            max-width: 90%;
+            width: 350px;
+            text-align: center;
+        }
+        .modal h3 { color: #1e5799; margin-bottom: 15px; }
+        .modal p { margin-bottom: 15px; font-size: 14px; line-height: 1.6; }
+        .modal-buttons { display: flex; gap: 10px; justify-content: center; }
+        .modal-buttons button { padding: 10px 20px; font-size: 14px; }
+        .btn-confirm { background: #2b8c5e; }
+        .btn-cancel { background: #6c757d; }
+        .btn-wa-modal { background: #25D366; }
+        @media (max-width: 700px) {
+            th, td { font-size: 10px; padding: 4px; }
+            input { width: 55px; font-size: 10px; }
+            button { padding: 4px 6px; font-size: 10px; }
+            .header h1 { font-size: 18px; }
+            .card-title { font-size: 16px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="header">
+        <h1>👑 صيدلية العابد</h1>
+        <p>نظام إدارة العملاء والديون</p>
+    </div>
+
+    <div class="card">
+        <div class="card-title">🔍 بحث سريع</div>
+        <div class="search-box">
+            <input type="text" id="searchId" placeholder="بحث برقم العميل">
+            <input type="text" id="searchName" placeholder="بحث باسم العميل">
+            <button onclick="searchCustomers()" class="touch-btn">🔍 بحث</button>
+            <button onclick="clearSearch()" class="touch-btn">🗑️ مسح</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">📊 الفلترة</div>
+        <div class="filter-buttons">
+            <button id="showAllBtn" onclick="setFilter('all')" style="background:#2b8c5e; color:white;" class="touch-btn">👥 عرض جميع العملاء</button>
+            <button id="showMovementBtn" onclick="setFilter('movement')" style="background:#FF9800; color:white; opacity:0.6;" class="touch-btn">📊 عملاء الحركة اليومية فقط</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">📂 استيراد البيانات</div>
+        <div class="import-section">
+            <strong>📊 استيراد عملاء</strong>
+            <p>مثال: 1 , محمد أحمد , 777777777 , 5000</p>
+            <input type="file" id="fileCustomers" accept=".csv,.txt">
+            <button class="btn-import touch-btn" onclick="importCustomersCSV()">📥 استيراد العملاء</button>
+        </div>
+        <div class="import-section">
+            <strong>📊 استيراد ديون</strong>
+            <p>مثال: 1 , 500 أو 1 , -200</p>
+            <input type="file" id="fileMovement" accept=".csv,.txt">
+            <button class="btn-import touch-btn" onclick="importMovementCSV()">📥 استيراد الديون</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">☁️ التخزين السحابي (Firebase)</div>
+        <div class="sync-status" id="syncStatus">✅ متصل بالنظام المحلي</div>
+        <div class="button-group">
+            <button class="btn-save-cloud touch-btn" onclick="saveToCloudNow()">☁️ حفظ في السحابة</button>
+            <button class="touch-btn" onclick="loadFromCloudNow()">📥 استرجاع من السحابة</button>
+        </div>
+        <div id="cloudMsg" style="text-align: center; margin-top: 10px; font-weight: bold;"></div>
+    </div>
+
+    <div class="card">
+        <div class="card-title">👥 العملاء والحركة اليومية</div>
+        <div class="stats" id="stats">📊 جاري التحميل...</div>
+        <div class="table-scroll"><div id="customersTable"></div></div>
+        <div class="button-group">
+            <button onclick="addCustomer()" class="touch-btn">➕ إضافة عميل</button>
+            <button onclick="exportToExcel()" class="touch-btn">📊 تصدير Excel</button>
+            <button class="btn-group touch-btn" onclick="sendGroupWhatsApp()">📱 واتساب للكل</button>
+            <button class="btn-sms touch-btn" onclick="sendGroupSMS()">✉️ رسائل للكل</button>
+        </div>
+    </div>
+    
+    <div class="footer">صيدلية العابد - تعز - الحوبان - مدخل البريد - 770066128</div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Modal for sending message after save -->
+<div class="modal-overlay" id="messageModal">
+    <div class="modal">
+        <h3>📨 إرسال إشعار</h3>
+        <p id="modalMessage">هل تريد إرسال رسالة للعميل؟</p>
+        <div class="modal-buttons">
+            <button class="btn-wa-modal" onclick="modalSendWhatsApp()">📱 واتساب</button>
+            <button class="btn-sms" onclick="modalSendSMS()">✉️ رسالة</button>
+            <button class="btn-cancel" onclick="closeModal()">❌ إغلاق</button>
+        </div>
+    </div>
+</div>
+<script>
+    const FIREBASE_URL = "https://alabeed-pharmacy-default-rtdb.firebaseio.com/customers.json";
+    
+    let customers = [];
+    let searchId = "", searchName = "";
+    let currentFilter = "all";
+    let isAndroid = typeof Android !== 'undefined';
+    let modalCustomerId = null;
+    let modalNewTotal = 0;
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    function getMovementMessage(customer, newTotal) {
+        if (customer.debt > 0 && customer.paid > 0) {
+            return `الاخ ${customer.name}، نود اعلامكم بان تم تقيد مبلغ ${customer.debt.toLocaleString()} ريال (فاتورة جديدة) وتم استلام مبلغ ${customer.paid.toLocaleString()} ريال (سداد) ليصبح اجمالي الرصيد عليكم ${newTotal.toLocaleString()} ريال.\n\nيرجى السداد بداية ونهاية كل شهر\n\n🏥 صيدلية العابد\nتعز - الحوبان - مدخل البريد\n📞 770066128`;
+        } else if (customer.debt > 0) {
+            return `الاخ ${customer.name}، نود اعلامكم بان تم تقيد مبلغ ${customer.debt.toLocaleString()} ريال (فاتورة جديدة) ليصبح اجمالي الرصيد عليكم ${newTotal.toLocaleString()} ريال.\n\nيرجى السداد بداية ونهاية كل شهر\n\n🏥 صيدلية العابد\nتعز - الحوبان - مدخل البريد\n📞 770066128`;
+        } else if (customer.paid > 0) {
+            return `الاخ ${customer.name}، نود اعلامكم بان تم استلام مبلغ ${customer.paid.toLocaleString()} ريال (سداد) ليصبح اجمالي الرصيد عليكم ${newTotal.toLocaleString()} ريال.\n\nيرجى السداد بداية ونهاية كل شهر\n\n🏥 صيدلية العابد\nتعز - الحوبان - مدخل البريد\n📞 770066128`;
+        }
+        return "";
+    }
+
+    function getReminderMessage(customer) {
+        return `سلام الله عليكم يا ${customer.name}، لو سمحت ممكن تسديد الحساب نهاية شهر وبداية الشهر، الصيدلية صيدليتك بأي وقت.\nحسابك: ${(customer.totalDebt || 0).toLocaleString()} ريال\nصيدلية العابد`;
+    }
+
+    function saveToLocal() {
+        localStorage.setItem('pharmacy_customers', JSON.stringify(customers));
+        document.getElementById('syncStatus').innerHTML = '✅ محلي: ' + new Date().toLocaleTimeString();
+    }
+
+    function loadFromLocal() {
+        const saved = localStorage.getItem('pharmacy_customers');
+        if (saved) {
+            customers = JSON.parse(saved);
+            renderTable();
+            return true;
+        }
+        return false;
+    }
+
+    async function saveToCloudNow() {
+        try {
+            document.getElementById('cloudMsg').innerHTML = '⏳ جاري الرفع...';
+            const response = await fetch(FIREBASE_URL, {
+                method: 'PUT',
+                body: JSON.stringify(customers),
+                headers: { 'Content-Type': 'application/json' }
+            });
+            if (response.ok) {
+                document.getElementById('cloudMsg').innerHTML = '<span style="color: #2b8c5e;">✅ تم الحفظ السحابي!</span>';
+                showToast('✅ تم الحفظ السحابي بنجاح');
+            } else {
+                document.getElementById('cloudMsg').innerHTML = '<span style="color: #dc3545;">❌ فشل الحفظ</span>';
+            }
+        } catch(e) {
+            document.getElementById('cloudMsg').innerHTML = '<span style="color: #dc3545;">❌ خطأ في الاتصال</span>';
+        }
+        setTimeout(() => document.getElementById('cloudMsg').innerHTML = '', 5000);
+    }
+
+    async function loadFromCloudNow() {
+        try {
+            document.getElementById('syncStatus').innerHTML = '⏳ جاري التحميل...';
+            const response = await fetch(FIREBASE_URL);
+            const data = await response.json();
+            if (data) {
+                customers = Array.isArray(data) ? data.filter(item => item !== null) : Object.values(data);
+                saveToLocal();
+                renderTable();
+                document.getElementById('syncStatus').innerHTML = '✅ تم مزامنة البيانات';
+                showToast('✅ تم تحميل البيانات السحابية');
+            } else {
+                document.getElementById('syncStatus').innerHTML = '⚠️ السحابة فارغة';
+            }
+        } catch(e) {
+            document.getElementById('syncStatus').innerHTML = '⚠️ فشل الاتصال بالسحابة';
+        }
+    }
+
+    function importCustomersCSV() {
+        const fileInput = document.getElementById('fileCustomers');
+        if (!fileInput.files.length) { 
+            showToast('❌ اختر ملف أولاً'); 
+            return; 
+        }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split('\n');
+            let count = 0;
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const columns = line.split(',');
+                if (columns.length >= 4) {
+                    const id = columns[0].trim();
+                    const name = columns[1].trim();
+                    const phone = columns[2].trim().replace(/[^0-9]/g, '');
+                    const totalDebt = parseFloat(columns[3].trim()) || 0;
+                    if (isNaN(id)) continue; 
+                    let existingIdx = customers.findIndex(c => c.id == id);
+                    if (existingIdx !== -1) {
+                        customers[existingIdx].name = name;
+                        customers[existingIdx].phone = phone;
+                        customers[existingIdx].totalDebt = totalDebt;
+                    } else {
+                        customers.push({
+                            id: parseInt(id),
+                            name: name,
+                            phone: phone,
+                            totalDebt: totalDebt,
+                            debt: 0,
+                            paid: 0
+                        });
+                    }
+                    count++;
+                }
+            }
+            saveToLocal();
+            renderTable();
+            showToast(`✅ تم استيراد ${count} عميل`);
+            fileInput.value = '';
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
+
+    function importMovementCSV() {
+        const fileInput = document.getElementById('fileMovement');
+        if (!fileInput.files.length) { 
+            showToast('❌ اختر ملف أولاً'); 
+            return; 
+        }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split('\n');
+            let updatedCount = 0;
+            let notFoundCount = 0;
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const columns = line.split(',');
+                if (columns.length >= 2) {
+                    const id = columns[0].trim();
+                    const amount = parseFloat(columns[1].trim()) || 0;
+                    if (isNaN(id)) continue;
+                    let customer = customers.find(c => c.id == id);
+                    if (customer) {
+                        if (amount > 0) {
+                            customer.debt = (customer.debt || 0) + amount;
+                        } else if (amount < 0) {
+                            customer.paid = (customer.paid || 0) + Math.abs(amount);
+                        }
+                        updatedCount++;
+                    } else {
+                        notFoundCount++;
+                    }
+                }
+            }
+            saveToLocal();
+            renderTable();
+            if (notFoundCount > 0) {
+                showToast(`⚠️ تحديث ${updatedCount} عميل - ${notFoundCount} غير موجودين`);
+            } else {
+                showToast(`✅ تم تطبيق الحركة لـ ${updatedCount} عميل`);
+            }
+            fileInput.value = '';
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
+
+    function setFilter(filter) {
+        currentFilter = filter;
+        const allBtn = document.getElementById('showAllBtn');
+        const movementBtn = document.getElementById('showMovementBtn');
+        if (filter === 'all') {
+            allBtn.style.background = "#2b8c5e"; allBtn.style.opacity = "1";
+            movementBtn.style.background = "#FF9800"; movementBtn.style.opacity = "0.6";
+        } else {
+            allBtn.style.background = "#2b8c5e"; allBtn.style.opacity = "0.6";
+            movementBtn.style.background = "#FF9800"; movementBtn.style.opacity = "1";
+        }
+        renderTable();
+    }
+
+    function getFilteredCustomers() {
+        let filtered = [...customers];
+        if (searchId) filtered = filtered.filter(c => c.id.toString().includes(searchId));
+        if (searchName) filtered = filtered.filter(c => c.name.includes(searchName));
+        if (currentFilter === 'movement') {
+            filtered = filtered.filter(c => (c.debt || 0) > 0 || (c.paid || 0) > 0);
+        }
+        return filtered;
+    }
+
+    function renderTable() {
+        const filtered = getFilteredCustomers();
+        if (!filtered.length) {
+            document.getElementById('customersTable').innerHTML = '<div class="empty">📭 لا يوجد عملاء معروضين</div>';
+            document.getElementById('stats').innerHTML = `📊 إجمالي: ${customers.length} | معروض: 0 | 🔴 حركة اليوم: ${customers.filter(c => (c.debt||0)>0 || (c.paid||0)>0).length}`;
+            return;
+        }
+        let html = `<table><thead><tr><th>#</th><th>الاسم</th><th>الجوال</th><th>الرصيد الرئيسي</th><th>فاتورة(+)</th><th>سداد(-)</th><th>الرصيد الجديد</th><th>إجراءات</th></tr></thead><tbody>`;
+        for (let c of filtered) {
+            const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+            const hasMovement = (c.debt || 0) > 0 || (c.paid || 0) > 0;
+            const rowClass = hasMovement ? 'movement-row' : '';
+            html += `<tr class="${rowClass}">
+                <td>${c.id}</td>
+                <td><strong>${c.name}</strong></td>
+                <td><input type="text" id="phone_${c.id}" value="${c.phone || ''}" style="width:90px"></td>
+                <td><input type="number" id="balance_${c.id}" value="${c.totalDebt || 0}" step="any" style="width:70px"></td>
+                <td><input type="number" id="debt_${c.id}" value="${c.debt || 0}" step="any" style="width:60px"></td>
+                <td><input type="number" id="paid_${c.id}" value="${c.paid || 0}" step="any" style="width:60px"></td>
+                <td id="new_${c.id}" style="color:#2b8c5e; font-weight:bold;">${newTotal.toLocaleString()}</td>
+                <td>
+                    <button onclick="updateCustomer(${c.id})" class="touch-btn">💾</button>
+                    <button class="btn-wa touch-btn" onclick="sendWA(${c.id})">📱</button>
+                    <button class="btn-sms touch-btn" onclick="sendSMS(${c.id})">✉️</button>
+                    <button class="btn-danger touch-btn" onclick="deleteCustomer(${c.id})">🗑️</button>
+                </td>
+            </tr>`;
+        }
+        html += `</tbody></table>`;
+        document.getElementById('customersTable').innerHTML = html;
+        document.getElementById('stats').innerHTML = `📊 إجمالي: ${customers.length} | معروض: ${filtered.length} | 🔴 حركة اليوم: ${customers.filter(c => (c.debt||0)>0 || (c.paid||0)>0).length}`;
+        for (let c of filtered) {
+            if (document.getElementById(`debt_${c.id}`)) {
+                document.getElementById(`debt_${c.id}`).oninput = () => updateNewTotal(c.id);
+                document.getElementById(`paid_${c.id}`).oninput = () => updateNewTotal(c.id);
+            }
+        }
+    }
+
+    function updateNewTotal(id) {
+        const c = customers.find(c => c.id == id);
+        if (c) {
+            const debt = parseFloat(document.getElementById(`debt_${id}`).value) || 0;
+            const paid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
+            const newTotal = (c.totalDebt || 0) + debt - paid;
+            const newSpan = document.getElementById(`new_${id}`);
+            if (newSpan) newSpan.innerHTML = newTotal.toLocaleString();
+        }
+    }
+
+    // ========== MODAL FUNCTIONS ==========
+    function showModal(customerId, newTotal) {
+        modalCustomerId = customerId;
+        modalNewTotal = newTotal;
+        const c = customers.find(c => c.id == customerId);
+        if (!c) return;
+        let msg = "";
+        if ((c.debt || 0) > 0 && (c.paid || 0) > 0) {
+            msg = `العميل: ${c.name}\nفاتورة جديدة: ${c.debt.toLocaleString()} ريال\nسداد: ${c.paid.toLocaleString()} ريال\nالرصيد الجديد: ${newTotal.toLocaleString()} ريال\n\nهل تريد إرسال إشعار؟`;
+        } else if ((c.debt || 0) > 0) {
+            msg = `العميل: ${c.name}\nفاتورة جديدة: ${c.debt.toLocaleString()} ريال\nالرصيد الجديد: ${newTotal.toLocaleString()} ريال\n\nهل تريد إرسال إشعار؟`;
+        } else if ((c.paid || 0) > 0) {
+            msg = `العميل: ${c.name}\nسداد: ${c.paid.toLocaleString()} ريال\nالرصيد الجديد: ${newTotal.toLocaleString()} ريال\n\nهل تريد إرسال إشعار؟`;
+        } else {
+            return;
+        }
+        document.getElementById('modalMessage').innerText = msg;
+        document.getElementById('messageModal').classList.add('active');
+    }
+
+    function closeModal() {
+        document.getElementById('messageModal').classList.remove('active');
+        modalCustomerId = null;
+    }
+
+    function modalSendWhatsApp() {
+        if (modalCustomerId) {
+            sendWA(modalCustomerId);
+        }
+        closeModal();
+    }
+
+    function modalSendSMS() {
+        if (modalCustomerId) {
+            sendSMS(modalCustomerId);
+        }
+        closeModal();
+    }
+
+    // ========== UPDATED SAVE FUNCTION ==========
+    async function updateCustomer(id) {
+        const c = customers.find(c => c.id == id);
+        if (!c) return;
+        c.phone = document.getElementById(`phone_${id}`).value;
+        const newDebt = parseFloat(document.getElementById(`debt_${id}`).value) || 0;
+        const newPaid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
+        const currentBalance = parseFloat(document.getElementById(`balance_${id}`).value) || 0;
+        const finalTotal = currentBalance + newDebt - newPaid;
+        c.totalDebt = finalTotal;
+        c.debt = newDebt;
+        c.paid = newPaid;
+        saveToLocal();
+        renderTable();
+        showToast(`✅ تم حفظ ${c.name}`);
+        if (isAndroid) Android.showToast(`✅ تم حفظ العميل: ${c.name}`);
+        // ✅ إظهار Modal لإرسال رسالة إذا كان هناك حركة
+        if (newDebt > 0 || newPaid > 0) {
+            showModal(id, finalTotal);
+        }
+    }
+
+    async function deleteCustomer(id) {
+        if (confirm('هل أنت متأكد من الحذف؟')) {
+            customers = customers.filter(c => c.id != id);
+            saveToLocal(); renderTable();
+            showToast('✅ تم الحذف');
+            if (isAndroid) Android.showToast('✅ تم الحذف محلياً');
+        }
+    }
+
+    function sendWA(id) {
+        const c = customers.find(c => c.id == id);
+        if (!c || !c.phone) { 
+            showToast('❌ رقم غير موجود'); 
+            if (isAndroid) Android.showToast('❌ رقم غير موجود');
+            return; 
+        }
+        let msg = "";
+        const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+        if ((c.debt || 0) > 0 || (c.paid || 0) > 0) { 
+            msg = getMovementMessage(c, newTotal); 
+        } else { 
+            msg = getReminderMessage(c); 
+        }
+        let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
+        if (isAndroid) {
+            Android.openWhatsApp(phone, msg);
+        } else {
+            window.open(`https://wa.me/967${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+        }
+    }
+
+    function sendSMS(id) {
+        const c = customers.find(c => c.id == id);
+        if (!c || !c.phone) { 
+            showToast('❌ رقم غير موجود'); 
+            if (isAndroid) Android.showToast('❌ رقم غير موجود');
+            return; 
+        }
+        let msg = "";
+        const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+        if ((c.debt || 0) > 0 || (c.paid || 0) > 0) { 
+            msg = getMovementMessage(c, newTotal); 
+        } else { 
+            msg = getReminderMessage(c); 
+        }
+        let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
+        if (isAndroid) {
+            Android.openSMS(phone, msg);
+        } else {
+            window.location.href = `sms:+967${phone}?body=${encodeURIComponent(msg)}`;
+        }
+    }
+
+    async function sendGroupWhatsApp() {
+        let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
+        if (!targets.length) { 
+            showToast('❌ لا يوجد عملاء بحركة'); 
+            if (isAndroid) Android.showToast('❌ لا يوجد عملاء لديهم حركة يومية');
+            return; 
+        }
+        for (let i = 0; i < targets.length; i++) {
+            const c = targets[i]; 
+            const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+            let msg = getMovementMessage(c, newTotal);
+            let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
+            if (isAndroid) {
+                Android.openWhatsApp(phone, msg);
+            } else {
+                window.open(`https://wa.me/967${phone}?text=${encodeURIComponent(msg)}`, '_blank');
+            }
+            if (i < targets.length - 1) { 
+                await new Promise(resolve => { 
+                    if (isAndroid) {
+                        Android.showAlert('تم الإرسال', `تم فتح محادثة ${c.name} - اضغط موافق للتالي`);
+                        setTimeout(resolve, 2000);
+                    } else {
+                        alert(`✅ تم فتح محادثة ${c.name}\nاضغط OK للتالي`); 
+                        resolve(); 
+                    }
+                }); 
+            }
+        }
+        showToast('✅ تم الانتهاء');
+        if (isAndroid) Android.showToast('✅ تم الانتهاء');
+    }
+
+    async function sendGroupSMS() {
+        let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
+        if (!targets.length) { 
+            showToast('❌ لا يوجد عملاء بحركة'); 
+            if (isAndroid) Android.showToast('❌ لا يوجد عملاء لديهم حركة يومية');
+            return; 
+        }
+        for (let i = 0; i < targets.length; i++) {
+            const c = targets[i]; 
+            const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+            let msg = getMovementMessage(c, newTotal);
+            let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
+            if (isAndroid) {
+                Android.openSMS(phone, msg);
+            } else {
+                window.location.href = `sms:+967${phone}?body=${encodeURIComponent(msg)}`;
+            }
+            if (i < targets.length - 1) { 
+                await new Promise(resolve => { 
+                    if (isAndroid) {
+                        Android.showAlert('تم الإرسال', `تم إرسال رسالة لـ ${c.name} - اضغط موافق للتالي`);
+                        setTimeout(resolve, 2000);
+                    } else {
+                        alert(`✅ تم إرسال رسالة لـ ${c.name}\nاضغط OK للتالي`); 
+                        resolve(); 
+                    }
+                }); 
+            }
+        }
+        showToast('✅ تم إرسال الرسائل');
+        if (isAndroid) Android.showToast('✅ تم إرسال الرسائل');
+    }
+
+    async function addCustomer() {
+        let name = prompt('📝 اسم العميل:'); 
+        if (!name) return;
+        let phone = prompt('📞 رقم الهاتف:'); 
+        if (!phone) return;
+        let id = Date.now();
+        customers.push({ 
+            id: id, 
+            name: name, 
+            phone: phone.replace(/[^0-9]/g, ''), 
+            totalDebt: 0, 
+            debt: 0, 
+            paid: 0 
+        });
+        saveToLocal(); renderTable();
+        showToast('✅ تم الإضافة');
+        if (isAndroid) Android.showToast('✅ تم إضافة العميل');
+    }
+
+    function exportToExcel() {
+        if (!customers.length) { 
+            showToast('لا توجد بيانات'); 
+            if (isAndroid) Android.showToast('لا توجد بيانات');
+            return; 
+        }
+        let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد\n";
+        for (let c of customers) { 
+            csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"\n`; 
+        }
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+        const a = document.createElement("a"); 
+        a.href = URL.createObjectURL(blob);
+        a.download = `تقرير_صيدلية_العابد_${new Date().toISOString().slice(0,10)}.csv`; 
+        a.click(); 
+        URL.revokeObjectURL(a.href);
+        showToast('✅ تم التصدير');
+        if (isAndroid) Android.showToast('✅ تم تصدير Excel');
+    }
+
+    function searchCustomers() {
+        searchId = document.getElementById('searchId').value.trim();
+        searchName = document.getElementById('searchName').value.trim();
+        renderTable();
+    }
+
+    function clearSearch() {
+        document.getElementById('searchId').value = ''; 
+        document.getElementById('searchName').value = '';
+        searchId = ""; searchName = ""; renderTable();
+    }
+
+    window.updateCustomer = updateCustomer; 
+    window.sendWA = sendWA; 
+    window.sendSMS = sendSMS;
+    window.deleteCustomer = deleteCustomer; 
+    window.addCustomer = addCustomer;
+    window.sendGroupWhatsApp = sendGroupWhatsApp; 
+    window.sendGroupSMS = sendGroupSMS;
+    window.exportToExcel = exportToExcel; 
+    window.searchCustomers = searchCustomers;
+    window.clearSearch = clearSearch; 
+    window.setFilter = setFilter;
+    window.saveToCloudNow = saveToCloudNow; 
+    window.loadFromCloudNow = loadFromCloudNow;
+    window.importCustomersCSV = importCustomersCSV; 
+    window.importMovementCSV = importMovementCSV;
+    window.closeModal = closeModal;
+    window.modalSendWhatsApp = modalSendWhatsApp;
+    window.modalSendSMS = modalSendSMS;
+
+    if (!loadFromLocal()) { customers = []; }
+    renderTable();
+
+    if (isAndroid) {
+        Android.showToast('✅ مرحباً بك في صيدلية العابد');
+    }
+</script>
+</body>
+</html>
