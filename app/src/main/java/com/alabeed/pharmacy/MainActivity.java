@@ -1,6 +1,4 @@
-
-# Create the updated MainActivity.java with Android native storage support
-main_activity_updated = '''package com.alabeed.pharmacy;
+'''package com.alabeed.pharmacy;
 
 import android.app.Activity;
 import android.app.AlertDialog;
