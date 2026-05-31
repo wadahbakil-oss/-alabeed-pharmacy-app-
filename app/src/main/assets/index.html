@@ -1,4 +1,21 @@
-<!DOCTYPE html>
+
+# I see the issue now. In the HTML file, the \n is being written as literal text
+# When JavaScript reads it from the HTML, it sees \n as two characters (backslash + n)
+# But in template literals, \n should be interpreted as newline
+# The issue is that in the HTML source, we have \\n which becomes \n in the string
+
+# Let me check what the actual string looks like in the browser
+# The problem is: in the HTML file, we wrote \\n (two backslashes + n)
+# When JavaScript parses this, it becomes \n (one backslash + n) in the string
+# But \n in a template literal is NOT a newline - it's a literal backslash followed by n
+# In template literals, actual newlines work, or we need to use \n with proper escaping
+
+# The fix: We need to use actual newlines in the template literal, OR use \n in regular strings
+# Since we're writing HTML, we should use actual line breaks in the template literal
+
+# Let me rewrite the file with proper fixes for all three issues
+
+new_html = '''<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -96,7 +113,7 @@
             text-align: center; 
             font-size: 12px; 
         }
-        tr { height: 40px; }
+        tr { height: auto; }
         input[type="number"], input[type="text"] { 
             padding: 5px; 
             border-radius: 5px; 
@@ -258,15 +275,6 @@
             font-size: 13px;
             color: #856404;
         }
-        .trial-countdown {
-            background: #e3f2fd;
-            padding: 8px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            font-size: 14px;
-            color: #1e5799;
-            font-weight: bold;
-        }
 
         /* Settings button */
         .settings-btn {
@@ -310,13 +318,41 @@
             color: #666;
         }
 
+        /* Action buttons grid - 2x2 layout */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4px;
+            width: 100%;
+        }
+        .action-buttons button {
+            width: 100%;
+            margin: 0;
+            padding: 8px 4px;
+            font-size: 11px;
+            min-height: 40px;
+        }
+
+        /* Compact row styling */
+        .compact-row td {
+            padding: 4px 2px;
+            vertical-align: middle;
+        }
+        .compact-row input {
+            padding: 3px;
+            font-size: 11px;
+        }
+
         @media (max-width: 700px) {
-            th, td { font-size: 10px; padding: 4px; }
+            th, td { font-size: 10px; padding: 4px 2px; }
             input { width: 55px; font-size: 10px; }
             button { padding: 4px 6px; font-size: 10px; }
             .header h1 { font-size: 18px; }
             .card-title { font-size: 16px; }
-            tr { height: 35px; }
+            .action-buttons button { font-size: 10px; padding: 6px 2px; }
+        }
+        @media (max-width: 400px) {
+            .action-buttons button { font-size: 9px; padding: 5px 2px; }
         }
     </style>
 </head>
@@ -450,6 +486,7 @@
     let currentGroupIndex = 0;
     let currentGroupTargets = [];
     let currentGroupType = '';
+    let isSendingSequence = false;
 
     // Trial duration: 24 hours = 86400000 ms
     const TRIAL_DURATION = 86400000;
@@ -593,22 +630,26 @@
     }
 
     // ========== MESSAGE FUNCTIONS ==========
+    // Using actual newlines in template literals for proper WhatsApp formatting
     function getMovementMessage(customer, newTotal) {
+        const header = "يرجى السداد بداية ونهاية كل شهر";
+        const footer = "🏥 صيدلية العابد" + "\n" + "تعز - الحوبان - مدخل البريد" + "\n" + "📞 770066128";
+        
         if (customer.debt > 0 && customer.paid > 0) {
-            return `الاخ ${customer.name}، نود اعلامكم بان تم تقيد مبلغ ${customer.debt.toLocaleString()} ريال (فاتورة جديدة) وتم استلام مبلغ ${customer.paid.toLocaleString()} ريال (سداد) ليصبح اجمالي الرصيد عليكم ${newTotal.toLocaleString()} ريال.\\n\\nيرجى السداد بداية ونهاية كل شهر\\n\\n🏥 صيدلية العابد\\nتعز - الحوبان - مدخل البريد\\n📞 770066128`;
+            return "الاخ " + customer.name + "، نود اعلامكم بان تم تقيد مبلغ " + customer.debt.toLocaleString() + " ريال (فاتورة جديدة) وتم استلام مبلغ " + customer.paid.toLocaleString() + " ريال (سداد) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "\n\n" + header + "\n\n" + footer;
         } else if (customer.debt > 0) {
-            return `الاخ ${customer.name}، نود اعلامكم بان تم تقيد مبلغ ${customer.debt.toLocaleString()} ريال (فاتورة جديدة) ليصبح اجمالي الرصيد عليكم ${newTotal.toLocaleString()} ريال.\\n\\nيرجى السداد بداية ونهاية كل شهر\\n\\n🏥 صيدلية العابد\\nتعز - الحوبان - مدخل البريد\\n📞 770066128`;
+            return "الاخ " + customer.name + "، نود اعلامكم بان تم تقيد مبلغ " + customer.debt.toLocaleString() + " ريال (فاتورة جديدة) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "\n\n" + header + "\n\n" + footer;
         } else if (customer.paid > 0) {
-            return `الاخ ${customer.name}، نود اعلامكم بان تم استلام مبلغ ${customer.paid.toLocaleString()} ريال (سداد) ليصبح اجمالي الرصيد عليكم ${newTotal.toLocaleString()} ريال.\\n\\nيرجى السداد بداية ونهاية كل شهر\\n\\n🏥 صيدلية العابد\\nتعز - الحوبان - مدخل البريد\\n📞 770066128`;
+            return "الاخ " + customer.name + "، نود اعلامكم بان تم استلام مبلغ " + customer.paid.toLocaleString() + " ريال (سداد) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "\n\n" + header + "\n\n" + footer;
         }
         return "";
     }
 
     function getReminderMessage(customer) {
-        return `سلام الله عليكم يا ${customer.name}، لو سمحت ممكن تسديد الحساب نهاية شهر وبداية الشهر، الصيدلية صيدليتك بأي وقت.\\nحسابك: ${(customer.totalDebt || 0).toLocaleString()} ريال\\nصيدلية العابد`;
+        return "سلام الله عليكم يا " + customer.name + "، لو سمحت ممكن تسديد الحساب نهاية شهر وبداية الشهر، الصيدلية صيدليتك بأي وقت." + "\n" + "حسابك: " + (customer.totalDebt || 0).toLocaleString() + " ريال" + "\n" + "صيدلية العابد";
     }
 
-    // ========== SEQUENTIAL WHATSAPP SENDING ==========
+    // ========== SEQUENTIAL SENDING WITH DELAY ==========
     async function sendGroupWhatsAppMovement() {
         let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
         if (!targets.length) { 
@@ -619,6 +660,7 @@
         currentGroupTargets = targets;
         currentGroupIndex = 0;
         currentGroupType = 'whatsapp';
+        isSendingSequence = true;
 
         showToast(`📱 جاري الإرسال لـ ${targets.length} عميل...`);
         sendNextInSequence();
@@ -634,6 +676,7 @@
         currentGroupTargets = targets;
         currentGroupIndex = 0;
         currentGroupType = 'whatsapp_all';
+        isSendingSequence = true;
 
         showToast(`📱 جاري الإرسال لـ ${targets.length} عميل...`);
         sendNextInSequence();
@@ -649,6 +692,7 @@
         currentGroupTargets = targets;
         currentGroupIndex = 0;
         currentGroupType = 'sms';
+        isSendingSequence = true;
 
         showToast(`✉️ جاري الإرسال لـ ${targets.length} عميل...`);
         sendNextInSequence();
@@ -656,7 +700,8 @@
 
     function sendNextInSequence() {
         if (currentGroupIndex >= currentGroupTargets.length) {
-            showToast('✅ تم الانتهاء من الإرسال');
+            isSendingSequence = false;
+            showToast('✅ تم الانتهاء من الإرسال لـ ' + currentGroupTargets.length + ' عميل');
             return;
         }
 
@@ -679,7 +724,10 @@
             }
 
             currentGroupIndex++;
-            showToast(`📱 تم فتح واتساب ${c.name} (${currentGroupIndex}/${currentGroupTargets.length})`);
+            showToast(`📱 ${currentGroupIndex}/${currentGroupTargets.length}: ${c.name}`);
+            
+            // Auto-send next after 3 seconds delay
+            setTimeout(sendNextInSequence, 3000);
 
         } else if (currentGroupType === 'sms') {
             msg = getMovementMessage(c, newTotal);
@@ -691,7 +739,10 @@
             }
 
             currentGroupIndex++;
-            showToast(`✉️ تم فتح رسائل ${c.name} (${currentGroupIndex}/${currentGroupTargets.length})`);
+            showToast(`✉️ ${currentGroupIndex}/${currentGroupTargets.length}: ${c.name}`);
+            
+            // Auto-send next after 3 seconds delay
+            setTimeout(sendNextInSequence, 3000);
         }
     }
 
@@ -760,7 +811,7 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const text = e.target.result;
-            const lines = text.split('\\n');
+            const lines = text.split('\n');
             let count = 0;
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
@@ -808,7 +859,7 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const text = e.target.result;
-            const lines = text.split('\\n');
+            const lines = text.split('\n');
             let updatedCount = 0;
             let notFoundCount = 0;
             for (let i = 0; i < lines.length; i++) {
@@ -879,20 +930,22 @@
         for (let c of filtered) {
             const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
             const hasMovement = (c.debt || 0) > 0 || (c.paid || 0) > 0;
-            const rowClass = hasMovement ? 'movement-row' : '';
+            const rowClass = hasMovement ? 'movement-row compact-row' : 'compact-row';
             html += `<tr class="${rowClass}">
                 <td>${c.id}</td>
                 <td><strong>${c.name}</strong></td>
-                <td><input type="text" id="phone_${c.id}" value="${c.phone || ''}" style="width:90px"></td>
-                <td><input type="number" id="balance_${c.id}" value="${c.totalDebt || 0}" step="any" style="width:70px"></td>
-                <td><input type="number" id="debt_${c.id}" value="${c.debt || 0}" step="any" style="width:60px"></td>
-                <td><input type="number" id="paid_${c.id}" value="${c.paid || 0}" step="any" style="width:60px"></td>
-                <td id="new_${c.id}" style="color:#2b8c5e; font-weight:bold;">${newTotal.toLocaleString()}</td>
+                <td><input type="text" id="phone_${c.id}" value="${c.phone || ''}" style="width:85px; font-size:11px;"></td>
+                <td><input type="number" id="balance_${c.id}" value="${c.totalDebt || 0}" step="any" style="width:65px; font-size:11px;"></td>
+                <td><input type="number" id="debt_${c.id}" value="${c.debt || 0}" step="any" style="width:55px; font-size:11px;"></td>
+                <td><input type="number" id="paid_${c.id}" value="${c.paid || 0}" step="any" style="width:55px; font-size:11px;"></td>
+                <td id="new_${c.id}" style="color:#2b8c5e; font-weight:bold; font-size:11px;">${newTotal.toLocaleString()}</td>
                 <td>
-                    <button onclick="updateCustomer(${c.id})" class="touch-btn">💾</button>
-                    <button class="btn-wa touch-btn" onclick="sendWA(${c.id})">📱</button>
-                    <button class="btn-sms touch-btn" onclick="sendSMS(${c.id})">✉️</button>
-                    <button class="btn-danger touch-btn" onclick="deleteCustomer(${c.id})">🗑️</button>
+                    <div class="action-buttons">
+                        <button onclick="updateCustomer(${c.id})" class="touch-btn" title="حفظ">💾</button>
+                        <button class="btn-wa touch-btn" onclick="sendWA(${c.id})" title="واتساب">📱</button>
+                        <button class="btn-sms touch-btn" onclick="sendSMS(${c.id})" title="رسالة">✉️</button>
+                        <button class="btn-danger touch-btn" onclick="deleteCustomer(${c.id})" title="حذف">🗑️</button>
+                    </div>
                 </td>
             </tr>`;
         }
@@ -926,11 +979,11 @@
         if (!c) return;
         let msg = "";
         if ((c.debt || 0) > 0 && (c.paid || 0) > 0) {
-            msg = `العميل: ${c.name}\\nفاتورة جديدة: ${c.debt.toLocaleString()} ريال\\nسداد: ${c.paid.toLocaleString()} ريال\\nالرصيد الجديد: ${newTotal.toLocaleString()} ريال\\n\\nهل تريد إرسال إشعار؟`;
+            msg = "العميل: " + c.name + "\nفاتورة جديدة: " + c.debt.toLocaleString() + " ريال\nسداد: " + c.paid.toLocaleString() + " ريال\nالرصيد الجديد: " + newTotal.toLocaleString() + " ريال\n\nهل تريد إرسال إشعار؟";
         } else if ((c.debt || 0) > 0) {
-            msg = `العميل: ${c.name}\\nفاتورة جديدة: ${c.debt.toLocaleString()} ريال\\nالرصيد الجديد: ${newTotal.toLocaleString()} ريال\\n\\nهل تريد إرسال إشعار؟`;
+            msg = "العميل: " + c.name + "\nفاتورة جديدة: " + c.debt.toLocaleString() + " ريال\nالرصيد الجديد: " + newTotal.toLocaleString() + " ريال\n\nهل تريد إرسال إشعار؟";
         } else if ((c.paid || 0) > 0) {
-            msg = `العميل: ${c.name}\\nسداد: ${c.paid.toLocaleString()} ريال\\nالرصيد الجديد: ${newTotal.toLocaleString()} ريال\\n\\nهل تريد إرسال إشعار؟`;
+            msg = "العميل: " + c.name + "\nسداد: " + c.paid.toLocaleString() + " ريال\nالرصيد الجديد: " + newTotal.toLocaleString() + " ريال\n\nهل تريد إرسال إشعار؟";
         } else {
             return;
         }
@@ -1058,11 +1111,11 @@
             if (isAndroid) Android.showToast('لا توجد بيانات');
             return; 
         }
-        let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد\\n";
+        let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد\n";
         for (let c of customers) { 
-            csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"\\n`; 
+            csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"\n`; 
         }
-        const blob = new Blob(["\\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
         const a = document.createElement("a"); 
         a.href = URL.createObjectURL(blob);
         a.download = `تقرير_صيدلية_العابد_${new Date().toISOString().slice(0,10)}.csv`; 
@@ -1119,4 +1172,4 @@
     }
 </script>
 </body>
-</html>'''
+</html>
