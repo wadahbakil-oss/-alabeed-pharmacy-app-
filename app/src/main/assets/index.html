@@ -1,21 +1,4 @@
-
-# I see the issue now. In the HTML file, the \n is being written as literal text
-# When JavaScript reads it from the HTML, it sees \n as two characters (backslash + n)
-# But in template literals, \n should be interpreted as newline
-# The issue is that in the HTML source, we have \\n which becomes \n in the string
-
-# Let me check what the actual string looks like in the browser
-# The problem is: in the HTML file, we wrote \\n (two backslashes + n)
-# When JavaScript parses this, it becomes \n (one backslash + n) in the string
-# But \n in a template literal is NOT a newline - it's a literal backslash followed by n
-# In template literals, actual newlines work, or we need to use \n with proper escaping
-
-# The fix: We need to use actual newlines in the template literal, OR use \n in regular strings
-# Since we're writing HTML, we should use actual line breaks in the template literal
-
-# Let me rewrite the file with proper fixes for all three issues
-
-new_html = '''<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
