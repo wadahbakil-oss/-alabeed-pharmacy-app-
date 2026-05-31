@@ -73,6 +73,17 @@
             font-weight: bold; 
             font-size: 13px;
         }
+        .total-debt-box {
+            background: #ffebee;
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 16px;
+            color: #c62828;
+            border: 2px solid #ef9a9a;
+        }
         .sync-status { 
             background: #fff3cd; 
             padding: 8px; 
@@ -333,6 +344,7 @@
             .header h1 { font-size: 18px; }
             .card-title { font-size: 16px; }
             .action-buttons button { font-size: 10px; padding: 6px 2px; }
+            .total-debt-box { font-size: 14px; }
         }
         @media (max-width: 400px) {
             .action-buttons button { font-size: 9px; padding: 5px 2px; }
@@ -376,6 +388,11 @@
         <p>نظام إدارة العملاء والديون</p>
     </div>
 
+    <!-- Total Debt Summary -->
+    <div class="total-debt-box" id="totalDebtBox">
+        💰 إجمالي الديون: 0 ريال
+    </div>
+
     <div class="card">
         <div class="card-title">🔍 بحث سريع</div>
         <div class="search-box">
@@ -391,22 +408,6 @@
         <div class="filter-buttons">
             <button id="showAllBtn" onclick="setFilter('all')" style="background:#2b8c5e; color:white;" class="touch-btn">👥 عرض جميع العملاء</button>
             <button id="showMovementBtn" onclick="setFilter('movement')" style="background:#FF9800; color:white; opacity:0.6;" class="touch-btn">📊 عملاء الحركة اليومية فقط</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="card-title">📂 استيراد البيانات</div>
-        <div class="import-section">
-            <strong>📊 استيراد عملاء</strong>
-            <p>مثال: 1 , محمد أحمد , 777777777 , 5000</p>
-            <input type="file" id="fileCustomers" accept=".csv,.txt">
-            <button class="btn-import touch-btn" onclick="importCustomersCSV()">📥 استيراد العملاء</button>
-        </div>
-        <div class="import-section">
-            <strong>📊 استيراد ديون</strong>
-            <p>مثال: 1 , 500 أو 1 , -200</p>
-            <input type="file" id="fileMovement" accept=".csv,.txt">
-            <button class="btn-import touch-btn" onclick="importMovementCSV()">📥 استيراد الديون</button>
         </div>
     </div>
 
@@ -428,11 +429,22 @@
             <button onclick="addCustomer()" class="touch-btn">➕ إضافة عميل</button>
             <button onclick="exportToExcel()" class="touch-btn">📊 تصدير Excel</button>
         </div>
+    </div>
 
-        <div class="button-group" style="margin-top: 10px;">
-            <button class="btn-group touch-btn" onclick="sendGroupWhatsAppMovement()" style="background: #25D366;">📱 واتساب - الحركة اليومية فقط</button>
-            <button class="btn-group touch-btn" onclick="sendGroupWhatsAppAll()" style="background: #128C7E;">📱 واتساب - جميع العملاء</button>
-            <button class="btn-sms touch-btn" onclick="sendGroupSMSMovement()">✉️ رسائل - الحركة اليومية فقط</button>
+    <!-- Import Section - Moved to bottom -->
+    <div class="card">
+        <div class="card-title">📂 استيراد البيانات</div>
+        <div class="import-section">
+            <strong>📊 استيراد عملاء</strong>
+            <p>مثال: 1 , محمد أحمد , 777777777 , 5000</p>
+            <input type="file" id="fileCustomers" accept=".csv,.txt">
+            <button class="btn-import touch-btn" onclick="importCustomersCSV()">📥 استيراد العملاء</button>
+        </div>
+        <div class="import-section">
+            <strong>📊 استيراد ديون</strong>
+            <p>مثال: 1 , 500 أو 1 , -200</p>
+            <input type="file" id="fileMovement" accept=".csv,.txt">
+            <button class="btn-import touch-btn" onclick="importMovementCSV()">📥 استيراد الديون</button>
         </div>
     </div>
 
@@ -466,12 +478,6 @@
     let modalNewTotal = 0;
 
     // Trial and activation variables
-    let currentGroupIndex = 0;
-    let currentGroupTargets = [];
-    let currentGroupType = '';
-    let isSendingSequence = false;
-
-    // Trial duration: 24 hours = 86400000 ms
     const TRIAL_DURATION = 86400000;
 
     function showToast(message) {
@@ -481,9 +487,8 @@
         setTimeout(() => toast.classList.remove('show'), 3000);
     }
 
-    // ========== ACTIVATION SYSTEM (No Password - Direct Access) ==========
+    // ========== ACTIVATION SYSTEM ==========
     function initSecurity() {
-        // Check if first run ever
         if (!localStorage.getItem('pharmacy_first_run')) {
             localStorage.setItem('pharmacy_first_run', Date.now().toString());
             localStorage.setItem('pharmacy_activated', 'false');
@@ -494,9 +499,7 @@
         const isActivated = localStorage.getItem('pharmacy_activated') === 'true';
         const activationExpiry = parseInt(localStorage.getItem('pharmacy_activation_expiry') || '0');
 
-        // Check if yearly activation expired
         if (isActivated && activationExpiry > 0 && now > activationExpiry) {
-            // Yearly activation expired, reset to trial
             localStorage.setItem('pharmacy_activated', 'false');
             localStorage.setItem('pharmacy_first_run', Date.now().toString());
             showToast('⚠️ انتهت صلاحية التفعيل السنوي');
@@ -505,13 +508,10 @@
         }
 
         if (isActivated) {
-            // Already activated (yearly), show app directly
             showMainApp();
         } else if (now - firstRun > TRIAL_DURATION) {
-            // Trial expired, show activation
             showActivationScreen();
         } else {
-            // Still in trial, show app directly
             const hoursLeft = Math.floor((TRIAL_DURATION - (now - firstRun)) / 3600000);
             const minsLeft = Math.floor(((TRIAL_DURATION - (now - firstRun)) % 3600000) / 60000);
             showMainApp();
@@ -536,15 +536,11 @@
 
     async function doActivate() {
         const code = document.getElementById('activationCode').value.trim();
-
         try {
-            // Check online activation codes from Firebase
             const response = await fetch(ACTIVATION_CODES_URL);
             const codes = await response.json();
-
             let isValid = false;
             let isYearly = false;
-
             if (codes) {
                 const codesList = Array.isArray(codes) ? codes : Object.values(codes);
                 for (let c of codesList) {
@@ -555,23 +551,19 @@
                     }
                 }
             }
-
             if (isValid) {
                 localStorage.setItem('pharmacy_activated', 'true');
                 if (isYearly) {
                     localStorage.setItem('pharmacy_activation_type', 'yearly');
-                    localStorage.setItem('pharmacy_activation_expiry', (Date.now() + 31536000000).toString()); // 1 year
+                    localStorage.setItem('pharmacy_activation_expiry', (Date.now() + 31536000000).toString());
                 }
                 document.getElementById('activationError').classList.remove('show');
                 showToast('✅ تم التفعيل بنجاح!');
-                setTimeout(() => {
-                    showMainApp();
-                }, 1500);
+                setTimeout(() => showMainApp(), 1500);
             } else {
                 document.getElementById('activationError').classList.add('show');
             }
         } catch(e) {
-            // Offline fallback - check local codes
             const localCodes = ['ALABEED2024', 'PHARMACY365', 'YEMEN2024'];
             if (localCodes.includes(code)) {
                 localStorage.setItem('pharmacy_activated', 'true');
@@ -579,9 +571,7 @@
                 localStorage.setItem('pharmacy_activation_expiry', (Date.now() + 31536000000).toString());
                 document.getElementById('activationError').classList.remove('show');
                 showToast('✅ تم التفعيل بنجاح!');
-                setTimeout(() => {
-                    showMainApp();
-                }, 1500);
+                setTimeout(() => showMainApp(), 1500);
             } else {
                 document.getElementById('activationError').classList.add('show');
             }
@@ -591,9 +581,7 @@
     function showSettings() {
         const isActivated = localStorage.getItem('pharmacy_activated') === 'true';
         const expiry = parseInt(localStorage.getItem('pharmacy_activation_expiry') || '0');
-        
         document.getElementById('activationStatus').textContent = isActivated ? 'الحالة: ✅ مفعل (سنوي)' : 'الحالة: ⏰ فترة تجريبية';
-        
         if (isActivated && expiry > 0) {
             const expiryDate = new Date(expiry);
             document.getElementById('activationExpiry').textContent = 'ينتهي: ' + expiryDate.toLocaleDateString('ar-SA');
@@ -604,7 +592,6 @@
             const minsLeft = Math.floor(((TRIAL_DURATION - (now - firstRun)) % 3600000) / 60000);
             document.getElementById('activationExpiry').textContent = `متبقي: ${hoursLeft} ساعة ${minsLeft} دقيقة`;
         }
-        
         document.getElementById('settingsModal').classList.add('active');
     }
 
@@ -613,11 +600,9 @@
     }
 
     // ========== MESSAGE FUNCTIONS ==========
-    // Using actual newlines in template literals for proper WhatsApp formatting
     function getMovementMessage(customer, newTotal) {
         const header = "يرجى السداد بداية ونهاية كل شهر";
         const footer = "🏥 صيدلية العابد" + "\n" + "تعز - الحوبان - مدخل البريد" + "\n" + "📞 770066128";
-        
         if (customer.debt > 0 && customer.paid > 0) {
             return "الاخ " + customer.name + "، نود اعلامكم بان تم تقيد مبلغ " + customer.debt.toLocaleString() + " ريال (فاتورة جديدة) وتم استلام مبلغ " + customer.paid.toLocaleString() + " ريال (سداد) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "\n\n" + header + "\n\n" + footer;
         } else if (customer.debt > 0) {
@@ -630,103 +615,6 @@
 
     function getReminderMessage(customer) {
         return "سلام الله عليكم يا " + customer.name + "، لو سمحت ممكن تسديد الحساب نهاية شهر وبداية الشهر، الصيدلية صيدليتك بأي وقت." + "\n" + "حسابك: " + (customer.totalDebt || 0).toLocaleString() + " ريال" + "\n" + "صيدلية العابد";
-    }
-
-    // ========== SEQUENTIAL SENDING WITH DELAY ==========
-    async function sendGroupWhatsAppMovement() {
-        let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
-        if (!targets.length) { 
-            showToast('❌ لا يوجد عملاء بحركة يومية'); 
-            return; 
-        }
-
-        currentGroupTargets = targets;
-        currentGroupIndex = 0;
-        currentGroupType = 'whatsapp';
-        isSendingSequence = true;
-
-        showToast(`📱 جاري الإرسال لـ ${targets.length} عميل...`);
-        sendNextInSequence();
-    }
-
-    async function sendGroupWhatsAppAll() {
-        let targets = customers.filter(c => c.phone && c.phone.length >= 9);
-        if (!targets.length) { 
-            showToast('❌ لا يوجد عملاء'); 
-            return; 
-        }
-
-        currentGroupTargets = targets;
-        currentGroupIndex = 0;
-        currentGroupType = 'whatsapp_all';
-        isSendingSequence = true;
-
-        showToast(`📱 جاري الإرسال لـ ${targets.length} عميل...`);
-        sendNextInSequence();
-    }
-
-    async function sendGroupSMSMovement() {
-        let targets = customers.filter(c => c.phone && c.phone.length >= 9 && ((c.debt || 0) > 0 || (c.paid || 0) > 0));
-        if (!targets.length) { 
-            showToast('❌ لا يوجد عملاء بحركة يومية'); 
-            return; 
-        }
-
-        currentGroupTargets = targets;
-        currentGroupIndex = 0;
-        currentGroupType = 'sms';
-        isSendingSequence = true;
-
-        showToast(`✉️ جاري الإرسال لـ ${targets.length} عميل...`);
-        sendNextInSequence();
-    }
-
-    function sendNextInSequence() {
-        if (currentGroupIndex >= currentGroupTargets.length) {
-            isSendingSequence = false;
-            showToast('✅ تم الانتهاء من الإرسال لـ ' + currentGroupTargets.length + ' عميل');
-            return;
-        }
-
-        const c = currentGroupTargets[currentGroupIndex];
-        const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
-        let msg = "";
-        let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
-
-        if (currentGroupType === 'whatsapp' || currentGroupType === 'whatsapp_all') {
-            if (currentGroupType === 'whatsapp') {
-                msg = getMovementMessage(c, newTotal);
-            } else {
-                msg = getReminderMessage(c);
-            }
-
-            if (isAndroid) {
-                Android.openWhatsApp(phone, msg);
-            } else {
-                window.open(`https://wa.me/967${phone}?text=${encodeURIComponent(msg)}`, '_blank');
-            }
-
-            currentGroupIndex++;
-            showToast(`📱 ${currentGroupIndex}/${currentGroupTargets.length}: ${c.name}`);
-            
-            // Auto-send next after 3 seconds delay
-            setTimeout(sendNextInSequence, 3000);
-
-        } else if (currentGroupType === 'sms') {
-            msg = getMovementMessage(c, newTotal);
-
-            if (isAndroid) {
-                Android.openSMS(phone, msg);
-            } else {
-                window.location.href = `sms:+967${phone}?body=${encodeURIComponent(msg)}`;
-            }
-
-            currentGroupIndex++;
-            showToast(`✉️ ${currentGroupIndex}/${currentGroupTargets.length}: ${c.name}`);
-            
-            // Auto-send next after 3 seconds delay
-            setTimeout(sendNextInSequence, 3000);
-        }
     }
 
     // ========== DATA FUNCTIONS ==========
@@ -857,8 +745,10 @@
                     if (customer) {
                         if (amount > 0) {
                             customer.debt = (customer.debt || 0) + amount;
+                            customer.totalDebt = (customer.totalDebt || 0) + amount;
                         } else if (amount < 0) {
                             customer.paid = (customer.paid || 0) + Math.abs(amount);
+                            customer.totalDebt = (customer.totalDebt || 0) - Math.abs(amount);
                         }
                         updatedCount++;
                     } else {
@@ -902,8 +792,21 @@
         return filtered;
     }
 
+    function calculateTotalDebt() {
+        let total = 0;
+        for (let c of customers) {
+            total += (c.totalDebt || 0);
+        }
+        return total;
+    }
+
     function renderTable() {
         const filtered = getFilteredCustomers();
+        
+        // Update total debt display
+        const totalDebt = calculateTotalDebt();
+        document.getElementById('totalDebtBox').innerHTML = `💰 إجمالي الديون: ${totalDebt.toLocaleString()} ريال`;
+        
         if (!filtered.length) {
             document.getElementById('customersTable').innerHTML = '<div class="empty">📭 لا يوجد عملاء معروضين</div>';
             document.getElementById('stats').innerHTML = `📊 إجمالي: ${customers.length} | معروض: 0 | 🔴 حركة اليوم: ${customers.filter(c => (c.debt||0)>0 || (c.paid||0)>0).length}`;
@@ -993,23 +896,38 @@
         closeModal();
     }
 
-    // ========== UPDATED SAVE FUNCTION ==========
+    // ========== FIXED UPDATE CUSTOMER ==========
     async function updateCustomer(id) {
         const c = customers.find(c => c.id == id);
         if (!c) return;
         c.phone = document.getElementById(`phone_${id}`).value;
-        const newDebt = parseFloat(document.getElementById(`debt_${id}`).value) || 0;
-        const newPaid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
-        const currentBalance = parseFloat(document.getElementById(`balance_${id}`).value) || 0;
-        const finalTotal = currentBalance + newDebt - newPaid;
-        c.totalDebt = finalTotal;
-        c.debt = newDebt;
-        c.paid = newPaid;
+        
+        // Get the values from input fields
+        const inputDebt = parseFloat(document.getElementById(`debt_${id}`).value) || 0;
+        const inputPaid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
+        const inputBalance = parseFloat(document.getElementById(`balance_${id}`).value) || 0;
+        
+        // Calculate what changed since last save
+        const debtDiff = inputDebt - (c.debt || 0);
+        const paidDiff = inputPaid - (c.paid || 0);
+        const balanceDiff = inputBalance - (c.totalDebt || 0);
+        
+        // Update totalDebt: add the differences
+        // If user changed balance input, add that difference
+        // If user added new debt, add that difference
+        // If user added new payment, subtract that difference
+        c.totalDebt = (c.totalDebt || 0) + balanceDiff + debtDiff - paidDiff;
+        
+        // Save current input values as the new baseline
+        c.debt = inputDebt;
+        c.paid = inputPaid;
+        
+        const finalTotal = c.totalDebt;
         saveToLocal();
         renderTable();
         showToast(`✅ تم حفظ ${c.name}`);
         if (isAndroid) Android.showToast(`✅ تم حفظ العميل: ${c.name}`);
-        if (newDebt > 0 || newPaid > 0) {
+        if (debtDiff > 0 || paidDiff > 0) {
             showModal(id, finalTotal);
         }
     }
@@ -1140,10 +1058,6 @@
     window.doActivate = doActivate;
     window.showSettings = showSettings;
     window.closeSettings = closeSettings;
-    window.sendGroupWhatsAppMovement = sendGroupWhatsAppMovement;
-    window.sendGroupWhatsAppAll = sendGroupWhatsAppAll;
-    window.sendGroupSMSMovement = sendGroupSMSMovement;
-    window.sendNextInSequence = sendNextInSequence;
 
     // Initialize
     initSecurity();
@@ -1155,4 +1069,4 @@
     }
 </script>
 </body>
-</html>
+</html>'''
