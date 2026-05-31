@@ -653,36 +653,61 @@
     }
 
         function exportToExcel() {
-        if (!customers.length) { showToast('لا توجد بيانات'); if (isAndroid) Android.showToast('لا توجد بيانات'); return; }
-        let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد\\n";
-        for (let c of customers) { csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"\\n`; }
-        const blob = new Blob(["\\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
-        const url = URL.createObjectURL(blob);
+    if (!customers.length) { 
+        showToast('لا توجد بيانات'); 
+        return; 
+    }
+    
+    let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد\n";
+    for (let c of customers) { 
+        csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"\n`; 
+    }
+    
+    // Method 1: Try to share via Android intent
+    try {
+        const shareData = {
+            title: 'تقرير صيدلية العابد',
+            text: csv
+        };
         
-        // Try Android native download first
-        if (isAndroid && Android.downloadFile) {
-            const reader = new FileReader();
-            reader.onload = function() {
-                const base64 = reader.result.split(',')[1];
-                Android.downloadFile(base64, `تقرير_صيدلية_العابد_${new Date().toISOString().slice(0,10)}.csv`);
-            };
-            reader.readAsDataURL(blob);
-            showToast('✅ تم التصدير');
-            if (isAndroid) Android.showToast('✅ تم تصدير Excel');
+        // Try Web Share API
+        if (navigator.share) {
+            navigator.share({
+                title: 'تقرير صيدلية العابد',
+                text: csv,
+            }).then(() => {
+                showToast('✅ تم المشاركة');
+            }).catch(() => {
+                // Fallback to copy
+                copyToClipboard(csv);
+            });
             return;
         }
-        
-        // Fallback for browser/WebView
-        const a = document.createElement("a");
-        a.href = url;
-        a.download = `تقرير_صيدلية_العابد_${new Date().toISOString().slice(0,10)}.csv`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        showToast('✅ تم التصدير');
-        if (isAndroid) Android.showToast('✅ تم تصدير Excel');
+    } catch(e) {}
+    
+    // Method 2: Copy to clipboard
+    copyToClipboard(csv);
+}
+
+function copyToClipboard(text) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.style.position = 'fixed';
+    textarea.style.opacity = '0';
+    document.body.appendChild(textarea);
+    textarea.select();
+    
+    try {
+        document.execCommand('copy');
+        showToast('✅ تم النسخ! افتح Excel والصق');
+        if (isAndroid) Android.showToast('✅ تم النسخ! افتح Excel والصق');
+    } catch(e) {
+        showToast('❌ فشل النسخ');
     }
+    
+    document.body.removeChild(textarea);
+}
+
     function searchCustomers() {
         searchId = document.getElementById('searchId').value.trim();
         searchName = document.getElementById('searchName').value.trim();
