@@ -108,7 +108,7 @@
             font-size: 12px; 
         }
         tr { height: auto; }
-        input[type="number"], input[type="text"] { 
+input[type="number"], input[type="text"] { 
             padding: 5px; 
             border-radius: 5px; 
             border: 1px solid #ccc; 
@@ -437,8 +437,9 @@
         <div class="import-section">
             <strong>📊 استيراد عملاء</strong>
             <p>مثال: 1 , محمد أحمد , 777777777 , 5000</p>
+        
             <input type="file" id="fileCustomers" accept=".csv,.txt">
-            <button class="btn-import touch-btn" onclick="importCustomersCSV()">📥 استيراد العملاء</button>
+    <button class="btn-import touch-btn" onclick="importCustomersCSV()">📥 استيراد العملاء</button>
         </div>
         <div class="import-section">
             <strong>📊 استيراد ديون</strong>
@@ -548,7 +549,7 @@
                         isValid = true;
                         isYearly = c.type === 'yearly';
                         break;
-                    }
+            }
                 }
             }
             if (isValid) {
@@ -602,19 +603,35 @@
     // ========== MESSAGE FUNCTIONS ==========
     function getMovementMessage(customer, newTotal) {
         const header = "يرجى السداد بداية ونهاية كل شهر";
-        const footer = "🏥 صيدلية العابد" + "\n" + "تعز - الحوبان - مدخل البريد" + "\n" + "📞 770066128";
+        const footer = "🏥 صيدلية العابد" + "
+" + "تعز - الحوبان - مدخل البريد" + "
+" + "📞 770066128";
         if (customer.debt > 0 && customer.paid > 0) {
-            return "الاخ " + customer.name + "، نود اعلامكم بان تم تقيد مبلغ " + customer.debt.toLocaleString() + " ريال (فاتورة جديدة) وتم استلام مبلغ " + customer.paid.toLocaleString() + " ريال (سداد) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "\n\n" + header + "\n\n" + footer;
+            return "الاخ " + customer.name + "، نود اعلامكم بان تم تقيد مبلغ " + customer.debt.toLocaleString() + " ريال (فاتورة جديدة) وتم استلام مبلغ " + customer.paid.toLocaleString() + " ريال (سداد) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "
+
+" + header + "
+
+" + footer;
         } else if (customer.debt > 0) {
-            return "الاخ " + customer.name + "، نود اعلامكم بان تم تقيد مبلغ " + customer.debt.toLocaleString() + " ريال (فاتورة جديدة) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "\n\n" + header + "\n\n" + footer;
+            return "الاخ " + customer.name + "، نود اعلامكم بان تم تقيد مبلغ " + customer.debt.toLocaleString() + " ريال (فاتورة جديدة) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "
+
+" + header + "
+
+" + footer;
         } else if (customer.paid > 0) {
-            return "الاخ " + customer.name + "، نود اعلامكم بان تم استلام مبلغ " + customer.paid.toLocaleString() + " ريال (سداد) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "\n\n" + header + "\n\n" + footer;
+            return "الاخ " + customer.name + "، نود اعلامكم بان تم استلام مبلغ " + customer.paid.toLocaleString() + " ريال (سداد) ليصبح اجمالي الرصيد عليكم " + newTotal.toLocaleString() + " ريال." + "
+
+" + header + "
+
+" + footer;
         }
         return "";
     }
 
     function getReminderMessage(customer) {
-        return "سلام الله عليكم يا " + customer.name + "، لو سمحت ممكن تسديد الحساب نهاية شهر وبداية الشهر، الصيدلية صيدليتك بأي وقت." + "\n" + "حسابك: " + (customer.totalDebt || 0).toLocaleString() + " ريال" + "\n" + "صيدلية العابد";
+        return "سلام الله عليكم يا " + customer.name + "، لو سمحت ممكن تسديد الحساب نهاية شهر وبداية الشهر، الصيدلية صيدليتك بأي وقت." + "
+" + "حسابك: " + (customer.totalDebt || 0).toLocaleString() + " ريال" + "
+" + "صيدلية العابد";
     }
 
     // ========== DATA FUNCTIONS ==========
@@ -642,7 +659,7 @@
                 headers: { 'Content-Type': 'application/json' }
             });
             if (response.ok) {
-                document.getElementById('cloudMsg').innerHTML = '<span style="color: #2b8c5e;">✅ تم الحفظ السحابي!</span>';
+        document.getElementById('cloudMsg').innerHTML = '<span style="color: #2b8c5e;">✅ تم الحفظ السحابي!</span>';
                 showToast('✅ تم الحفظ السحابي بنجاح');
             } else {
                 document.getElementById('cloudMsg').innerHTML = '<span style="color: #dc3545;">❌ فشل الحفظ</span>';
@@ -682,7 +699,8 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const text = e.target.result;
-            const lines = text.split('\n');
+            const lines = text.split('
+');
             let count = 0;
             for (let i = 0; i < lines.length; i++) {
                 const line = lines[i].trim();
@@ -730,7 +748,8 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             const text = e.target.result;
-            const lines = text.split('\n');
+            const lines = text.split('
+');
             let updatedCount = 0;
             let notFoundCount = 0;
             for (let i = 0; i < lines.length; i++) {
@@ -744,13 +763,13 @@
                     let customer = customers.find(c => c.id == id);
                     if (customer) {
                         if (amount > 0) {
+                            // Add to debt (daily movement)
                             customer.debt = (customer.debt || 0) + amount;
-                            customer.totalDebt = (customer.totalDebt || 0) + amount;
                         } else if (amount < 0) {
+                            // Add to paid (daily movement)
                             customer.paid = (customer.paid || 0) + Math.abs(amount);
-                            customer.totalDebt = (customer.totalDebt || 0) - Math.abs(amount);
-                        }
-                        updatedCount++;
+                                        }
+            updatedCount++;
                     } else {
                         notFoundCount++;
                     }
@@ -795,18 +814,19 @@
     function calculateTotalDebt() {
         let total = 0;
         for (let c of customers) {
-            total += (c.totalDebt || 0);
+            // Total debt = main balance + today's debt - today's paid
+            total += (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
         }
         return total;
     }
 
     function renderTable() {
         const filtered = getFilteredCustomers();
-        
+
         // Update total debt display
         const totalDebt = calculateTotalDebt();
         document.getElementById('totalDebtBox').innerHTML = `💰 إجمالي الديون: ${totalDebt.toLocaleString()} ريال`;
-        
+
         if (!filtered.length) {
             document.getElementById('customersTable').innerHTML = '<div class="empty">📭 لا يوجد عملاء معروضين</div>';
             document.getElementById('stats').innerHTML = `📊 إجمالي: ${customers.length} | معروض: 0 | 🔴 حركة اليوم: ${customers.filter(c => (c.debt||0)>0 || (c.paid||0)>0).length}`;
@@ -814,6 +834,7 @@
         }
         let html = `<table><thead><tr><th>#</th><th>الاسم</th><th>الجوال</th><th>الرصيد الرئيسي</th><th>فاتورة(+)</th><th>سداد(-)</th><th>الرصيد الجديد</th><th>إجراءات</th></tr></thead><tbody>`;
         for (let c of filtered) {
+            // Calculate new total: main balance + today's debt - today's paid
             const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
             const hasMovement = (c.debt || 0) > 0 || (c.paid || 0) > 0;
             const rowClass = hasMovement ? 'movement-row compact-row' : 'compact-row';
@@ -851,12 +872,12 @@
         if (c) {
             const debt = parseFloat(document.getElementById(`debt_${id}`).value) || 0;
             const paid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
+            // newTotal = main balance + debt - paid
             const newTotal = (c.totalDebt || 0) + debt - paid;
             const newSpan = document.getElementById(`new_${id}`);
             if (newSpan) newSpan.innerHTML = newTotal.toLocaleString();
         }
-    }
-
+                }
     // ========== MODAL FUNCTIONS ==========
     function showModal(customerId, newTotal) {
         modalCustomerId = customerId;
@@ -865,11 +886,24 @@
         if (!c) return;
         let msg = "";
         if ((c.debt || 0) > 0 && (c.paid || 0) > 0) {
-            msg = "العميل: " + c.name + "\nفاتورة جديدة: " + c.debt.toLocaleString() + " ريال\nسداد: " + c.paid.toLocaleString() + " ريال\nالرصيد الجديد: " + newTotal.toLocaleString() + " ريال\n\nهل تريد إرسال إشعار؟";
+            msg = "العميل: " + c.name + "
+فاتورة جديدة: " + c.debt.toLocaleString() + " ريال
+سداد: " + c.paid.toLocaleString() + " ريال
+الرصيد الجديد: " + newTotal.toLocaleString() + " ريال
+
+هل تريد إرسال إشعار؟";
         } else if ((c.debt || 0) > 0) {
-            msg = "العميل: " + c.name + "\nفاتورة جديدة: " + c.debt.toLocaleString() + " ريال\nالرصيد الجديد: " + newTotal.toLocaleString() + " ريال\n\nهل تريد إرسال إشعار؟";
+            msg = "العميل: " + c.name + "
+فاتورة جديدة: " + c.debt.toLocaleString() + " ريال
+الرصيد الجديد: " + newTotal.toLocaleString() + " ريال
+
+هل تريد إرسال إشعار؟";
         } else if ((c.paid || 0) > 0) {
-            msg = "العميل: " + c.name + "\nسداد: " + c.paid.toLocaleString() + " ريال\nالرصيد الجديد: " + newTotal.toLocaleString() + " ريال\n\nهل تريد إرسال إشعار؟";
+            msg = "العميل: " + c.name + "
+سداد: " + c.paid.toLocaleString() + " ريال
+الرصيد الجديد: " + newTotal.toLocaleString() + " ريال
+
+هل تريد إرسال إشعار؟";
         } else {
             return;
         }
@@ -898,39 +932,34 @@
 
     // ========== FIXED UPDATE CUSTOMER ==========
     async function updateCustomer(id) {
-        const c = customers.find(c => c.id == id);
-        if (!c) return;
-        c.phone = document.getElementById(`phone_${id}`).value;
-        
-        // Get the values from input fields
-        const inputDebt = parseFloat(document.getElementById(`debt_${id}`).value) || 0;
-        const inputPaid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
-        const inputBalance = parseFloat(document.getElementById(`balance_${id}`).value) || 0;
-        
-        // Calculate what changed since last save
-        const debtDiff = inputDebt - (c.debt || 0);
-        const paidDiff = inputPaid - (c.paid || 0);
-        const balanceDiff = inputBalance - (c.totalDebt || 0);
-        
-        // Update totalDebt: add the differences
-        // If user changed balance input, add that difference
-        // If user added new debt, add that difference
-        // If user added new payment, subtract that difference
-        c.totalDebt = (c.totalDebt || 0) + balanceDiff + debtDiff - paidDiff;
-        
-        // Save current input values as the new baseline
-        c.debt = inputDebt;
-        c.paid = inputPaid;
-        
-        const finalTotal = c.totalDebt;
-        saveToLocal();
-        renderTable();
-        showToast(`✅ تم حفظ ${c.name}`);
-        if (isAndroid) Android.showToast(`✅ تم حفظ العميل: ${c.name}`);
-        if (debtDiff > 0 || paidDiff > 0) {
-            showModal(id, finalTotal);
-        }
+    const c = customers.find(c => c.id == id);
+    if (!c) return;
+    c.phone = document.getElementById(`phone_${id}`).value;
+    
+    const inputDebt = parseFloat(document.getElementById(`debt_${id}`).value) || 0;
+    const inputPaid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
+    const inputBalance = parseFloat(document.getElementById(`balance_${id}`).value) || 0;
+    
+    // ✅ totalDebt يتغير بس لو المستخدم غير خانة الرصيد الرئيسي
+    if (inputBalance !== (c.totalDebt || 0)) {
+        c.totalDebt = inputBalance;
     }
+    
+    // ✅ debt و paid بس اللي بيتغيروا (حركة يومية)
+    c.debt = inputDebt;
+    c.paid = inputPaid;
+    
+    // ✅ الرصيد الجديد = الرصيد الأساسي + فاتورة - سداد
+    const finalTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+    
+    saveToLocal();
+    renderTable();
+    showToast(`✅ تم حفظ ${c.name}`);
+    if (isAndroid) Android.showToast(`✅ تم حفظ العميل: ${c.name}`);
+    if ((c.debt || 0) > 0 || (c.paid || 0) > 0) {
+        showModal(id, finalTotal);
+    }
+}
 
     async function deleteCustomer(id) {
         if (confirm('هل أنت متأكد من الحذف؟')) {
@@ -953,8 +982,8 @@
         if ((c.debt || 0) > 0 || (c.paid || 0) > 0) { 
             msg = getMovementMessage(c, newTotal); 
         } else { 
-            msg = getReminderMessage(c); 
-        }
+            msg = getReminderMessage(c);
+  }
         let phone = c.phone.replace(/^0+/, '').replace(/^967/, '').replace(/[^0-9]/g, '');
 
         if (isAndroid) {
@@ -1012,11 +1041,13 @@
             if (isAndroid) Android.showToast('لا توجد بيانات');
             return; 
         }
-        let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد\n";
+        let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد
+";
         for (let c of customers) { 
-            csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"\n`; 
+            csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"
+`; 
         }
-        const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8" });
+        const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
         const a = document.createElement("a"); 
         a.href = URL.createObjectURL(blob);
         a.download = `تقرير_صيدلية_العابد_${new Date().toISOString().slice(0,10)}.csv`; 
@@ -1069,4 +1100,4 @@
     }
 </script>
 </body>
-</html>'''
+</html>          
