@@ -191,6 +191,7 @@
     let modalCustomerId = null;
     let modalNewTotal = 0;
     const TRIAL_DURATION = 86400000;
+    const MOVEMENT_DURATION = 3600000; // 1 hour
 
     function showToast(message) {
         const toast = document.getElementById('toast');
@@ -232,6 +233,7 @@
         document.getElementById('mainContent').style.display = 'block';
         document.getElementById('settingsBtn').style.display = 'block';
         loadFromLocal();
+        clearExpiredMovements();
         renderTable();
     }
 
@@ -331,10 +333,27 @@
         const saved = localStorage.getItem('pharmacy_customers');
         if (saved) {
             customers = JSON.parse(saved);
-            renderTable();
             return true;
         }
         return false;
+    }
+
+    function clearExpiredMovements() {
+        const now = Date.now();
+        let cleared = 0;
+        for (let c of customers) {
+            if (c.movementTime && (now - c.movementTime > MOVEMENT_DURATION) && ((c.debt || 0) > 0 || (c.paid || 0) > 0)) {
+                c.totalDebt = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+                c.debt = 0;
+                c.paid = 0;
+                c.movementTime = 0;
+                cleared++;
+            }
+        }
+        if (cleared > 0) {
+            saveToLocal();
+            showToast(`⏰ تم تصفير حركة ${cleared} عميل (مرت ساعة)`);
+        }
     }
 
     async function saveToCloudNow() {
@@ -376,132 +395,43 @@
         }
     }
 
-
-    function updateCustomer(id) {
-        const c = customers.find(c => c.id == id);
-        if (!c) return;
-        c.phone = document.getElementById(`phone_${id}`).value;
-        const inputDebt = parseFloat(document.getElementById(`debt_${id}`).value) || 0;
-        const inputPaid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
-        const inputBalance = parseFloat(document.getElementById(`balance_${id}`).value) || 0;
-        
-        // Check if previous movement expired (1 hour = 3600000 ms)
-        const now = Date.now();
-        const lastMovementTime = c.movementTime || 0;
-        const oneHour = 3600000; // 1 hour in milliseconds
-        
-        // If more than 1 hour passed, auto-save previous movement to totalDebt
-        if (lastMovementTime > 0 && (now - lastMovementTime > oneHour)) {
-            // Auto-save: add old debt/paid to totalDebt and clear them
-            c.totalDebt = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
-            c.debt = 0;
-            c.paid = 0;
-            showToast(`⏰ تم تصفير حركة ${c.name} (مرت ساعة)`);
-        }
-        
-        // totalDebt يتغير بس لو المستخدم غير خانة الرصيد الرئيسي
-        if (inputBalance !== (c.totalDebt || 0)) {
-            c.totalDebt = inputBalance;
-        }
-        
-        // debt و paid بس اللي بيتغيروا (حركة يومية)
-        c.debt = inputDebt;
-        c.paid = inputPaid;
-        c.movementTime = now; // Save timestamp of this movement
-        
-        // الرصيد الجديد = الرصيد الأساسي + فاتورة - سداد
-        const finalTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
-        
-        saveToLocal();
-        renderTable();
-        showToast(`✅ تم حفظ ${c.name}`);
-        if (isAndroid) Android.showToast(`✅ تم حفظ العميل: ${c.name}`);
-        if ((c.debt || 0) > 0 || (c.paid || 0) > 0) {
-            showModal(id, finalTotal);
-        }
-    }'''
-
-content = content.replace(old_update, new_update)
-
-# Also add auto-clear on init and render
-old_init = '''    // Initialize
-    initSecurity();
-    if (!loadFromLocal()) { customers = []; }
-    renderTable();
-    if (isAndroid) { Android.showToast('✅ مرحباً بك في صيدلية العابد'); }'''
-
-new_init = '''    // Auto-clear expired movements (older than 1 hour)
-    function clearExpiredMovements() {
-        const now = Date.now();
-        const oneHour = 3600000;
-        let cleared = 0;
-        for (let c of customers) {
-            if (c.movementTime && (now - c.movementTime > oneHour) && ((c.debt || 0) > 0 || (c.paid || 0) > 0)) {
-                c.totalDebt = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
-                c.debt = 0;
-                c.paid = 0;
-                c.movementTime = 0;
-                cleared++;
-            }
-        }
-        if (cleared > 0) {
-            saveToLocal();
-            showToast(`⏰ تم تصفير حركة ${cleared} عميل (مرت ساعة)`);
-        }
-    }
-
-    // Initialize
-    initSecurity();
-    if (!loadFromLocal()) { customers = []; }
-    clearExpiredMovements(); // Clear old movements on startup
-    renderTable();
-    if (isAndroid) { Android.showToast('✅ مرحباً بك في صيدلية العابد'); }
-    
-    // Check every 5 minutes for expired movements
-    setInterval(clearExpiredMovements, 300000);'''
-
-content = content.replace(old_init, new_init)
-
-# Update renderTable to show remaining time
-old_render = '''        for (let c of filtered) {
-            const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
-            const hasMovement = (c.debt || 0) > 0 || (c.paid || 0) > 0;
-            const rowClass = hasMovement ? 'movement-row compact-row' : 'compact-row';
-            html += `<tr class="${rowClass}">
-                <td>${c.id}</td>
-                <td><strong>${c.name}</strong></td>
-                <td><input type="text" id="phone_${c.id}" value="${c.phone || ''}" style="width:85px; font-size:11px;"></td>
-                <td><input type="number" id="balance_${c.id}" value="${c.totalDebt || 0}" step="any" style="width:65px; font-size:11px;"></td>
-                <td><input type="number" id="debt_${c.id}" value="${c.debt || 0}" step="any" style="width:55px; font-size:11px;"></td>
-                <td><input type="number" id="paid_${c.id}" value="${c.paid || 0}" step="any" style="width:55px; font-size:11px;"></td>
-                <td id="new_${c.id}" style="color:#2b8c5e; font-weight:bold; font-size:11px;">${newTotal.toLocaleString()}</td>'''
-
-new_render = '''        for (let c of filtered) {
-            const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
-            const hasMovement = (c.debt || 0) > 0 || (c.paid || 0) > 0;
-            const rowClass = hasMovement ? 'movement-row compact-row' : 'compact-row';
-            
-            // Calculate remaining time
-            let timeBadge = '';
-            if (hasMovement && c.movementTime) {
-                const remaining = 3600000 - (Date.now() - c.movementTime);
-                if (remaining > 0) {
-                    const mins = Math.floor(remaining / 60000);
-                    timeBadge = `<span style="color:#FF9800; font-size:9px;">⏰ ${mins}د</span>`;
+    function importCustomersCSV() {
+        const fileInput = document.getElementById('fileCustomers');
+        if (!fileInput.files.length) { showToast('❌ اختر ملف أولاً'); return; }
+        const file = fileInput.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const lines = text.split('\n');
+            let count = 0;
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+                const columns = line.split(',');
+                if (columns.length >= 4) {
+                    const id = columns[0].trim();
+                    const name = columns[1].trim();
+                    const phone = columns[2].trim().replace(/[^0-9]/g, '');
+                    const totalDebt = parseFloat(columns[3].trim()) || 0;
+                    if (isNaN(id)) continue;
+                    let existingIdx = customers.findIndex(c => c.id == id);
+                    if (existingIdx !== -1) {
+                        customers[existingIdx].name = name;
+                        customers[existingIdx].phone = phone;
+                        customers[existingIdx].totalDebt = totalDebt;
+                    } else {
+                        customers.push({ id: parseInt(id), name: name, phone: phone, totalDebt: totalDebt, debt: 0, paid: 0 });
+                    }
+                    count++;
                 }
             }
-            
-            html += `<tr class="${rowClass}">
-                <td>${c.id}</td>
-                <td><strong>${c.name}</strong> ${timeBadge}</td>
-                <td><input type="text" id="phone_${c.id}" value="${c.phone || ''}" style="width:85px; font-size:11px;"></td>
-                <td><input type="number" id="balance_${c.id}" value="${c.totalDebt || 0}" step="any" style="width:65px; font-size:11px;"></td>
-                <td><input type="number" id="debt_${c.id}" value="${c.debt || 0}" step="any" style="width:55px; font-size:11px;"></td>
-                <td><input type="number" id="paid_${c.id}" value="${c.paid || 0}" step="any" style="width:55px; font-size:11px;"></td>
-                <td id="new_${c.id}" style="color:#2b8c5e; font-weight:bold; font-size:11px;">${newTotal.toLocaleString()}</td>'''
-
-content = content.replace(old_render, new_render)
-
+            saveToLocal();
+            renderTable();
+            showToast(`✅ تم استيراد ${count} عميل`);
+            fileInput.value = '';
+        };
+        reader.readAsText(file, 'UTF-8');
+    }
 
     function importMovementCSV() {
         const fileInput = document.getElementById('fileMovement');
@@ -591,9 +521,17 @@ content = content.replace(old_render, new_render)
             const newTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
             const hasMovement = (c.debt || 0) > 0 || (c.paid || 0) > 0;
             const rowClass = hasMovement ? 'movement-row compact-row' : 'compact-row';
+            let timeBadge = '';
+            if (hasMovement && c.movementTime) {
+                const remaining = MOVEMENT_DURATION - (Date.now() - c.movementTime);
+                if (remaining > 0) {
+                    const mins = Math.floor(remaining / 60000);
+                    timeBadge = `<span style="color:#FF9800; font-size:9px;">⏰ ${mins}د</span>`;
+                }
+            }
             html += `<tr class="${rowClass}">
                 <td>${c.id}</td>
-                <td><strong>${c.name}</strong></td>
+                <td><strong>${c.name}</strong> ${timeBadge}</td>
                 <td><input type="text" id="phone_${c.id}" value="${c.phone || ''}" style="width:85px; font-size:11px;"></td>
                 <td><input type="number" id="balance_${c.id}" value="${c.totalDebt || 0}" step="any" style="width:65px; font-size:11px;"></td>
                 <td><input type="number" id="debt_${c.id}" value="${c.debt || 0}" step="any" style="width:55px; font-size:11px;"></td>
@@ -673,16 +611,24 @@ content = content.replace(old_render, new_render)
         const inputPaid = parseFloat(document.getElementById(`paid_${id}`).value) || 0;
         const inputBalance = parseFloat(document.getElementById(`balance_${id}`).value) || 0;
         
-        // totalDebt يتغير بس لو المستخدم غير خانة الرصيد الرئيسي
+        const now = Date.now();
+        const lastMovementTime = c.movementTime || 0;
+        
+        if (lastMovementTime > 0 && (now - lastMovementTime > MOVEMENT_DURATION)) {
+            c.totalDebt = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
+            c.debt = 0;
+            c.paid = 0;
+            showToast(`⏰ تم تصفير حركة ${c.name} (مرت ساعة)`);
+        }
+        
         if (inputBalance !== (c.totalDebt || 0)) {
             c.totalDebt = inputBalance;
         }
         
-        // debt و paid بس اللي بيتغيروا (حركة يومية)
         c.debt = inputDebt;
         c.paid = inputPaid;
+        c.movementTime = now;
         
-        // الرصيد الجديد = الرصيد الأساسي + فاتورة - سداد
         const finalTotal = (c.totalDebt || 0) + (c.debt || 0) - (c.paid || 0);
         
         saveToLocal();
@@ -741,61 +687,35 @@ content = content.replace(old_render, new_render)
         if (isAndroid) Android.showToast('✅ تم إضافة العميل');
     }
 
-        function exportToExcel() {
-    if (!customers.length) { 
-        showToast('لا توجد بيانات'); 
-        return; 
+    function exportToExcel() {
+        if (!customers.length) { showToast('لا توجد بيانات'); return; }
+        let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد\n";
+        for (let c of customers) { csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"\n`; }
+        try {
+            if (navigator.share) {
+                navigator.share({ title: 'تقرير صيدلية العابد', text: csv }).then(() => { showToast('✅ تم المشاركة'); }).catch(() => { copyToClipboard(csv); });
+                return;
+            }
+        } catch(e) {}
+        copyToClipboard(csv);
     }
-    
-    let csv = "رقم العميل,اسم العميل,رقم الهاتف,الرصيد الحالي,فاتورة جديدة,سداد\n";
-    for (let c of customers) { 
-        csv += `"${c.id}","${c.name}","${c.phone}","${c.totalDebt}","${c.debt || 0}","${c.paid || 0}"\n`; 
-    }
-    
-    // Method 1: Try to share via Android intent
-    try {
-        const shareData = {
-            title: 'تقرير صيدلية العابد',
-            text: csv
-        };
-        
-        // Try Web Share API
-        if (navigator.share) {
-            navigator.share({
-                title: 'تقرير صيدلية العابد',
-                text: csv,
-            }).then(() => {
-                showToast('✅ تم المشاركة');
-            }).catch(() => {
-                // Fallback to copy
-                copyToClipboard(csv);
-            });
-            return;
-        }
-    } catch(e) {}
-    
-    // Method 2: Copy to clipboard
-    copyToClipboard(csv);
-}
 
-function copyToClipboard(text) {
-    const textarea = document.createElement('textarea');
-    textarea.value = text;
-    textarea.style.position = 'fixed';
-    textarea.style.opacity = '0';
-    document.body.appendChild(textarea);
-    textarea.select();
-    
-    try {
-        document.execCommand('copy');
-        showToast('✅ تم النسخ! افتح Excel والصق');
-        if (isAndroid) Android.showToast('✅ تم النسخ! افتح Excel والصق');
-    } catch(e) {
-        showToast('❌ فشل النسخ');
+    function copyToClipboard(text) {
+        const textarea = document.createElement('textarea');
+        textarea.value = text;
+        textarea.style.position = 'fixed';
+        textarea.style.opacity = '0';
+        document.body.appendChild(textarea);
+        textarea.select();
+        try {
+            document.execCommand('copy');
+            showToast('✅ تم النسخ! افتح Excel والصق');
+            if (isAndroid) Android.showToast('✅ تم النسخ! افتح Excel والصق');
+        } catch(e) {
+            showToast('❌ فشل النسخ');
+        }
+        document.body.removeChild(textarea);
     }
-    
-    document.body.removeChild(textarea);
-}
 
     function searchCustomers() {
         searchId = document.getElementById('searchId').value.trim();
@@ -819,8 +739,10 @@ function copyToClipboard(text) {
 
     initSecurity();
     if (!loadFromLocal()) { customers = []; }
+    clearExpiredMovements();
     renderTable();
     if (isAndroid) { Android.showToast('✅ مرحباً بك في صيدلية العابد'); }
+    setInterval(clearExpiredMovements, 300000);
 </script>
 </body>
 </html>
